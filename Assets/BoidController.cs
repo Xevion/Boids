@@ -18,11 +18,17 @@ public class BoidController : MonoBehaviour {
     private List<Boid> _boids = new List<Boid>();
     
     void Start() {
-        
+       for(int i = 0; i < boidCount; i++)
+           _boids.Add(new Boid(Vector2.zero, new Vector2(1, 1)));
     }
 
-    void Update()
-    {
-        
+    void Update() {
+        float[] magnitudes = new float[] {cohesionBias, separationBias, alignmentBias};
+        // Update all Boid positions
+        foreach (Boid boid in _boids) {
+            boid.SetPosition(boid.NextPosition(_boids, magnitudes));
+        }
     }
+    
+    
 }

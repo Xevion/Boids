@@ -5,7 +5,7 @@ public class Boid {
     private Vector2 _position;
     private Vector2 _velocity;
 
-    Boid(Vector2 position, Vector2 velocity) {
+    public Boid(Vector2 position, Vector2 velocity) {
         _position = position;
         _velocity = velocity;
     }
@@ -20,7 +20,7 @@ public class Boid {
     }
 
     // Returns the next position the Boid will be moving to
-    Vector2 NextPosition(List<Boid> boids, float[] magnitudes) {
+    public Vector2 NextPosition(List<Boid> boids, float[] magnitudes) {
         // Find the local flock
         List<Boid> flock = GetFlock(boids, 5);
         
