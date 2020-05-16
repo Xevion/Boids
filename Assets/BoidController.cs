@@ -1,21 +1,26 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Unity.Mathematics;
-using KNN;
-using KNN.Jobs;
 
 public class BoidController : MonoBehaviour {
-    public int BoidCount = 1000;
-    public int BoidGroupRange = 1.0f;
-
-    // Start is called before the first frame update
-    void Start()
-    {
+    // Controller Attributes
+    public Rect space;
+    
+    // Swarm Attributes
+    public int boidCount = 1000;
+    public float boidGroupRange = 1.0f;
+    
+    // Bias changes how different rules influence individual Boids more or less
+    public float separationBias = 1.0f;
+    public float alignmentBias = 1.0f;
+    public float cohesionBias = 1.0f;
+    
+    private List<Boid> _boids = new List<Boid>();
+    
+    void Start() {
         
     }
 
-    // Update is called once per frame
     void Update()
     {
         
