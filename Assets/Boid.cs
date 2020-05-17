@@ -21,16 +21,17 @@ public class Boid : MonoBehaviour {
     void Update() {
         // Updates the rotation of the object based on the Velocity
         transform.rotation = Quaternion.Euler(0, 0, Mathf.Rad2Deg * -Mathf.Atan2(velocity.x, velocity.y));
-    }
 
-    public Vector2 NextPosition(List<Boid> boids, float[] magnitudes) {
         // Skip Flock Calculations if wrapping in progress
-        if (IsWrappingX || IsWrappingY)
-            return position + velocity;
+        if (IsWrappingX || IsWrappingY) {
+            position += velocity;
+            return;
+        }
 
         // Acquires all Boids within the local flock
-        List<Boid> flock = GetFlock(parent.boids, parent.boidGroupRange);
-
+        // List<Boid> flock = GetFlock(parent.boids, parent.boidGroupRange);
+        List<Boid> flock = parent.boids;
+        
         if (flock.Count > 0) {
             // Calculate all offsets and multiple by magnitudes given
             Vector2 r1 = Rule1(flock) * parent.cohesionBias;
@@ -44,7 +45,36 @@ public class Boid : MonoBehaviour {
             velocity = (velocity / velocity.magnitude) * parent.boidVelocityLimit;
         }
 
-        return position + velocity;
+        position += velocity;
+        transform.position = new Vector3(position.x, position.y, 0);
+
+        Wrapping();
+    }
+
+    void Wrapping() {
+        if (!parent.space.Contains(position)) {
+            // Activate Wrap, Move
+            Vector2 newPosition = transform.position;
+            Vector3 viewportPosition = parent._cam.WorldToViewportPoint(newPosition);
+
+            if (!IsWrappingX && (viewportPosition.x > 1 || viewportPosition.x < 0)) {
+                newPosition.x = -newPosition.x;
+                IsWrappingX = true;
+            }
+
+            if (!IsWrappingY && (viewportPosition.y > 1 || viewportPosition.y < 0)) {
+                newPosition.y = -newPosition.y;
+                IsWrappingY = true;
+            }
+
+            transform.position = newPosition;
+            position = newPosition;
+        }
+        else {
+            // Within the rectangle again
+            IsWrappingX = false;
+            IsWrappingY = false;
+        }
     }
 
     Vector2 GetRandomVelocity(float magnitude) {

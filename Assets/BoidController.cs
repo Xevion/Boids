@@ -23,10 +23,10 @@ public class BoidController : MonoBehaviour {
     public GameObject boidObject;
 
     // Boid Objects for Updates
-    public List<Boid> boids = new List<Boid>();
+    [HideInInspector] public List<Boid> boids = new List<Boid>();
 
     // Used for wrapping
-    Camera _cam;
+    internal Camera _cam;
 
     private void OnDrawGizmos() {
         Gizmos.DrawWireCube(space.center, space.size);
@@ -38,8 +38,8 @@ public class BoidController : MonoBehaviour {
 
         // Size the Rectangle based on the Camera's Orthographic View
         float height = 2f * _cam.orthographicSize;
-        float width = height * _cam.aspect;
-        space = new Rect(transform.position, new Vector2(width, height));
+        Vector2 size = new Vector2(height * _cam.aspect, height);
+        space = new Rect((Vector2) transform.position - size / 2, size);
 
         // Add in Boid Objects / Spawn Boid Prefabs
         for (int i = 0; i < boidCount; i++) {
@@ -51,44 +51,6 @@ public class BoidController : MonoBehaviour {
             boid.transform.parent = transform;
             boids.Add(boid.GetComponent<Boid>());
             boids[boids.Count - 1].position = position;
-        }
-    }
-
-    private void Update() {
-        // Wrapping Functionality
-        foreach (Boid boid in boids) {
-            if (!space.Contains(boid.position)) {
-                // Activate Wrap, Move
-                Vector2 newPosition = boid.transform.position;
-                Vector3 viewportPosition = _cam.WorldToViewportPoint(newPosition);
-
-                if (!boid.IsWrappingX && (viewportPosition.x > 1 || viewportPosition.x < 0)) {
-                    newPosition.x = -newPosition.x;
-                    boid.IsWrappingX = true;
-                }
-
-                if (!boid.IsWrappingY && (viewportPosition.y > 1 || viewportPosition.y < 0)) {
-                    newPosition.y = -newPosition.y;
-                    boid.IsWrappingY = true;
-                }
-
-                boid.transform.position = newPosition;
-                boid.position = newPosition;
-            }
-            else {
-                // Within the rectangle again
-                boid.IsWrappingX = false;
-                boid.IsWrappingY = false;
-            }
-        }
-
-        float[] magnitudes = {cohesionBias, separationBias, alignmentBias};
-        // Update all Boid positions
-        foreach (Boid boid in boids) {
-            Vector2 next = boid.NextPosition(boids, magnitudes);
-
-            boid.position = next;
-            boid.transform.position = new Vector3(next.x, next.y, 0);
         }
     }
 }
