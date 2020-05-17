@@ -5,7 +5,7 @@ using Random = UnityEngine.Random;
 
 public class BoidController : MonoBehaviour {
     // Controller Attributes
-    [NonSerialized] public Rect space;
+    [NonSerialized] public Rect Space;
 
     // Swarm Attributes
     public int boidCount = 50;
@@ -26,27 +26,35 @@ public class BoidController : MonoBehaviour {
     [HideInInspector] public List<Boid> boids = new List<Boid>();
 
     // Used for wrapping
-    internal Camera _cam;
+    public Camera cam;
 
     private void OnDrawGizmos() {
-        Gizmos.DrawWireCube(space.center, space.size);
+        // Draw a Wire Cube for the Rectangle Area
+        Gizmos.DrawWireCube(Space.center, Space.size);
+        
+        // Draw a Wire Cube for the Cam's Viewport Area
+        Vector3 screenBottomLeft = cam.ViewportToWorldPoint(new Vector3(0, 0, transform.position.z));
+        Vector3 screenTopRight = cam.ViewportToWorldPoint(new Vector3(1, 1, transform.position.z));
+        var screenWidth = screenTopRight.x - screenBottomLeft.x;
+        var screenHeight = screenTopRight.y - screenBottomLeft.y;
+        Gizmos.DrawWireCube(cam.transform.position, new Vector3(screenWidth, screenHeight, 1));
     }
 
     private void Start() {
         // Setup Camera
-        _cam = Camera.main;
+        cam = Camera.main;
 
         // Size the Rectangle based on the Camera's Orthographic View
-        float height = 2f * _cam.orthographicSize;
-        Vector2 size = new Vector2(height * _cam.aspect, height);
-        space = new Rect((Vector2) transform.position - size / 2, size);
+        float height = 2f * cam.orthographicSize;
+        Vector2 size = new Vector2(height * cam.aspect, height);
+        Space = new Rect((Vector2) transform.position - size / 2, size);
 
         // Add in Boid Objects / Spawn Boid Prefabs
         for (int i = 0; i < boidCount; i++) {
             // Generate a new position within the Rect boundaries (minus a little)
             var position = new Vector2(
-                Random.Range(-space.size.x, space.size.x) / 2 * 0.95f,
-                Random.Range(-space.size.y, space.size.y) / 2 * 0.95f);
+                Random.Range(-Space.size.x, Space.size.x) / 2 * 0.95f,
+                Random.Range(-Space.size.y, Space.size.y) / 2 * 0.95f);
             // Spawn a new Boid prefab
             GameObject boid = Instantiate(boidObject, position, Quaternion.identity);
 

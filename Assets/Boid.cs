@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -49,9 +50,15 @@ public class Boid : MonoBehaviour {
         ScreenWrap();
     }
 
+    void OnDrawGizmos() {
+        Handles.color = _isWrappingX || _isWrappingY ? Color.red : Color.white;
+        Vector3 viewportPosition = _parent.cam.WorldToViewportPoint(transform.position);
+        Handles.Label(transform.position, $"{(Vector2) viewportPosition} {(_isWrappingX ? "Y" : "N")} {(_isWrappingY ? "Y" : "N")}");
+    }
+
     void ScreenWrap() {
-        foreach (var _renderer in _renderers)
-            if (_renderer.isVisible) {
+        foreach (var trenderer in _renderers)
+            if (trenderer.isVisible) {
                 _isWrappingX = false;
                 _isWrappingY = false;
                 return;
@@ -62,14 +69,16 @@ public class Boid : MonoBehaviour {
 
         // Activate Wrap, Move
         Vector2 newPosition = transform.position;
-        Vector3 viewportPosition = _parent._cam.WorldToViewportPoint(newPosition);
+        Vector3 viewportPosition = _parent.cam.WorldToViewportPoint(newPosition);
 
         if (!_isWrappingX && (viewportPosition.x > 1 || viewportPosition.x < 0)) {
+            print($"{transform.name} - Boid Wrapped on X Axis ({viewportPosition.x})");
             newPosition.x = -newPosition.x;
             _isWrappingX = true;
         }
 
         if (!_isWrappingY && (viewportPosition.y > 1 || viewportPosition.y < 0)) {
+            print($"{transform.name} - Boid Wrapped on Y Axis ({viewportPosition.y})");
             newPosition.y = -newPosition.y;
             _isWrappingY = true;
         }
