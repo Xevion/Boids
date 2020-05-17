@@ -1,28 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Debug = System.Diagnostics.Debug;
 using Random = UnityEngine.Random;
 
 public class BoidController : MonoBehaviour {
     // Controller Attributes
-    public Rect space;
+    [NonSerialized] public Rect space;
 
     // Swarm Attributes
     public int boidCount = 50;
     public float boidGroupRange = 1.0f;
     public float boidStartVelocity = 0.005f;
-    public float boidVelocityLimit = 2.0f;
+    public float boidVelocityLimit = 1.0f;
+    public float separationRange = 2.3f;
 
     // Bias changes how different rules influence individual Boids more or less
-    public float separationBias = 1.0f;
-    public float alignmentBias = 1.0f;
-    public float cohesionBias = 1.0f;
+    public float separationBias = 0.05f;
+    public float alignmentBias = 0.05f;
+    public float cohesionBias = 0.05f;
 
     // Boid Object Prefab
     public GameObject boidObject;
+
     // Boid Objects for Updates
     public List<Boid> boids = new List<Boid>();
+
     // Used for wrapping
     Camera _cam;
 
@@ -34,15 +36,16 @@ public class BoidController : MonoBehaviour {
         // Setup Camera
         _cam = Camera.main;
 
-        var size = new Vector2(142, 80);
-        space = new Rect((Vector2) transform.position - (size / 2), size);
-
-        // Size the Rectangle
-        _cam.rect = space;
+        // Size the Rectangle based on the Camera's Orthographic View
+        float height = 2f * _cam.orthographicSize;
+        float width = height * _cam.aspect;
+        space = new Rect(transform.position, new Vector2(width, height));
 
         // Add in Boid Objects / Spawn Boid Prefabs
         for (int i = 0; i < boidCount; i++) {
-            var position = new Vector2(Random.Range(-15, 15), Random.Range(-15, 15));
+            var position = new Vector2(
+                Random.Range(-space.size.x, space.size.x) / 2 * 0.95f,
+                Random.Range(-space.size.y, space.size.y) / 2 * 0.95f);
             GameObject boid = Instantiate(boidObject, position, Quaternion.identity);
 
             boid.transform.parent = transform;
@@ -54,13 +57,11 @@ public class BoidController : MonoBehaviour {
     private void Update() {
         // Wrapping Functionality
         foreach (Boid boid in boids) {
-            print($"{boid.IsWrappingX} {boid.IsWrappingY}");
-            
             if (!space.Contains(boid.position)) {
                 // Activate Wrap, Move
                 Vector2 newPosition = boid.transform.position;
                 Vector3 viewportPosition = _cam.WorldToViewportPoint(newPosition);
-                
+
                 if (!boid.IsWrappingX && (viewportPosition.x > 1 || viewportPosition.x < 0)) {
                     newPosition.x = -newPosition.x;
                     boid.IsWrappingX = true;
@@ -85,7 +86,7 @@ public class BoidController : MonoBehaviour {
         // Update all Boid positions
         foreach (Boid boid in boids) {
             Vector2 next = boid.NextPosition(boids, magnitudes);
-                
+
             boid.position = next;
             boid.transform.position = new Vector3(next.x, next.y, 0);
         }

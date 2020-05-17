@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Analytics;
 using Random = UnityEngine.Random;
 
 // Boids are represented by a moving, rotating triangle.
 // Boids should communicate with sibling Boids
 public class Boid : MonoBehaviour {
     [NonSerialized] public Vector2 position = Vector2.zero;
-    public Vector2 velocity;
+    [NonSerialized] public Vector2 velocity;
     [NonSerialized] public bool IsWrappingX = false;
     [NonSerialized] public bool IsWrappingY = false;
     private BoidController parent;
@@ -23,12 +22,12 @@ public class Boid : MonoBehaviour {
         // Updates the rotation of the object based on the Velocity
         transform.rotation = Quaternion.Euler(0, 0, Mathf.Rad2Deg * -Mathf.Atan2(velocity.x, velocity.y));
     }
-    
+
     public Vector2 NextPosition(List<Boid> boids, float[] magnitudes) {
         // Skip Flock Calculations if wrapping in progress
         if (IsWrappingX || IsWrappingY)
             return position + velocity;
-        
+
         // Acquires all Boids within the local flock
         List<Boid> flock = GetFlock(parent.boids, parent.boidGroupRange);
 
@@ -58,7 +57,7 @@ public class Boid : MonoBehaviour {
         Vector2 center = Vector2.zero;
         foreach (Boid boid in flock)
             center += boid.position;
-        center /= flock.Count;
+        center /= parent.boids.Count;
         return (center - this.position) / 100;
     }
 
@@ -67,7 +66,7 @@ public class Boid : MonoBehaviour {
         Vector2 c = Vector2.zero;
         foreach (Boid boid in flock) {
             Vector2 diff = boid.position - this.position;
-            if (diff.magnitude < 5)
+            if (diff.magnitude < parent.separationRange)
                 c -= diff;
         }
 
