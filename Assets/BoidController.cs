@@ -43,14 +43,16 @@ public class BoidController : MonoBehaviour {
 
         // Add in Boid Objects / Spawn Boid Prefabs
         for (int i = 0; i < boidCount; i++) {
+            // Generate a new position within the Rect boundaries (minus a little)
             var position = new Vector2(
                 Random.Range(-space.size.x, space.size.x) / 2 * 0.95f,
                 Random.Range(-space.size.y, space.size.y) / 2 * 0.95f);
+            // Spawn a new Boid prefab
             GameObject boid = Instantiate(boidObject, position, Quaternion.identity);
 
+            // Set parent, add Boid component to Boids list
             boid.transform.parent = transform;
             boids.Add(boid.GetComponent<Boid>());
-            boids[boids.Count - 1].position = position;
         }
     }
 }

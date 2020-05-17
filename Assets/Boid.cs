@@ -6,76 +6,76 @@ using Random = UnityEngine.Random;
 // Boids are represented by a moving, rotating triangle.
 // Boids should communicate with sibling Boids
 public class Boid : MonoBehaviour {
-    [NonSerialized] public Vector2 position = Vector2.zero;
-    [NonSerialized] public Vector2 velocity;
-    [NonSerialized] public bool IsWrappingX = false;
-    [NonSerialized] public bool IsWrappingY = false;
-    private BoidController parent;
+    [NonSerialized] private Vector2 _position = Vector2.zero;
+    [NonSerialized] private Vector2 _velocity;
+    [NonSerialized] private bool _isWrappingX = false;
+    [NonSerialized] private bool _isWrappingY = false;
+    [NonSerialized] private Renderer[] _renderers;
+    private BoidController _parent;
 
     void Start() {
-        parent = transform.parent.GetComponent<BoidController>();
-        // Acquire a Velocity Vector with a magnitude
-        velocity = GetRandomVelocity(parent.boidStartVelocity);
+        _parent = transform.parent.GetComponent<BoidController>(); // Parent used to perform physics math without caching
+        _renderers = transform.GetComponents<Renderer>(); // Acquire Renderer(s) to check for Boid visibility
+        _velocity = GetRandomVelocity(_parent.boidStartVelocity); // Acquire a Velocity Vector with a magnitude
+        _position = transform.position; // Track 2D position separately
+        transform.name = $"Boid {transform.GetSiblingIndex()}"; // Name the Game Object so Boids can be tracked somewhat
     }
 
     void Update() {
         // Updates the rotation of the object based on the Velocity
-        transform.rotation = Quaternion.Euler(0, 0, Mathf.Rad2Deg * -Mathf.Atan2(velocity.x, velocity.y));
+        transform.rotation = Quaternion.Euler(0, 0, Mathf.Rad2Deg * -Mathf.Atan2(_velocity.x, _velocity.y));
 
-        // Skip Flock Calculations if wrapping in progress
-        if (!IsWrappingX && !IsWrappingY) {
-            // Acquires all Boids within the local flock
-            // List<Boid> flock = GetFlock(parent.boids, parent.boidGroupRange);
-            List<Boid> flock = parent.boids;
+        // Acquires all Boids within the local flock
+        // List<Boid> flock = GetFlock(parent.boids, parent.boidGroupRange);
+        List<Boid> flock = _parent.boids;
 
-            if (flock.Count > 0) {
-                // Calculate all offsets and multiple by magnitudes given
-                Vector2 r1 = Rule1(flock) * parent.cohesionBias;
-                Vector2 r2 = Rule2(flock) * parent.separationBias;
-                Vector2 r3 = Rule3(flock) * parent.alignmentBias;
-                velocity += r1 + r2 + r3;
-            }
+        if (flock.Count > 0) {
+            // Calculate all offsets and multiple by magnitudes given
+            Vector2 r1 = Rule1(flock) * _parent.cohesionBias;
+            Vector2 r2 = Rule2(flock) * _parent.separationBias;
+            Vector2 r3 = Rule3(flock) * _parent.alignmentBias;
+            _velocity += r1 + r2 + r3;
+        }
 
-            // Limit the Velocity Vector to a certain Magnitude
-            if (velocity.magnitude > parent.boidVelocityLimit) {
-                velocity = (velocity / velocity.magnitude) * parent.boidVelocityLimit;
-            }
-
+        // Limit the Velocity Vector to a certain Magnitude
+        if (_velocity.magnitude > _parent.boidVelocityLimit) {
+            _velocity = (_velocity / _velocity.magnitude) * _parent.boidVelocityLimit;
         }
 
         // Update 2D and 3D transform positions based on current velocity
-        position += velocity;
-        transform.position = new Vector3(position.x, position.y, 0);
+        _position += _velocity;
+        transform.position = new Vector3(_position.x, _position.y, 0);
 
-        // If either dimension of wrapping is still unlocked, check wrapping code.
-        if(!IsWrappingX || !IsWrappingY)
-            Wrapping();
+        ScreenWrap();
     }
 
-    void Wrapping() {
-        if (!parent.space.Contains(position)) {
-            // Activate Wrap, Move
-            Vector2 newPosition = transform.position;
-            Vector3 viewportPosition = parent._cam.WorldToViewportPoint(newPosition);
-
-            if (!IsWrappingX && (viewportPosition.x > 1 || viewportPosition.x < 0)) {
-                newPosition.x = -newPosition.x;
-                IsWrappingX = true;
+    void ScreenWrap() {
+        foreach (var _renderer in _renderers)
+            if (_renderer.isVisible) {
+                _isWrappingX = false;
+                _isWrappingY = false;
+                return;
             }
 
-            if (!IsWrappingY && (viewportPosition.y > 1 || viewportPosition.y < 0)) {
-                newPosition.y = -newPosition.y;
-                IsWrappingY = true;
-            }
+        if (_isWrappingX && _isWrappingY)
+            return;
 
-            transform.position = newPosition;
-            position = newPosition;
+        // Activate Wrap, Move
+        Vector2 newPosition = transform.position;
+        Vector3 viewportPosition = _parent._cam.WorldToViewportPoint(newPosition);
+
+        if (!_isWrappingX && (viewportPosition.x > 1 || viewportPosition.x < 0)) {
+            newPosition.x = -newPosition.x;
+            _isWrappingX = true;
         }
-        else {
-            // Within the rectangle again
-            IsWrappingX = false;
-            IsWrappingY = false;
+
+        if (!_isWrappingY && (viewportPosition.y > 1 || viewportPosition.y < 0)) {
+            newPosition.y = -newPosition.y;
+            _isWrappingY = true;
         }
+
+        transform.position = newPosition;
+        _position = newPosition;
     }
 
     Vector2 GetRandomVelocity(float magnitude) {
@@ -87,17 +87,17 @@ public class Boid : MonoBehaviour {
     Vector2 Rule1(List<Boid> flock) {
         Vector2 center = Vector2.zero;
         foreach (Boid boid in flock)
-            center += boid.position;
-        center /= parent.boids.Count;
-        return (center - this.position) / 100;
+            center += boid._position;
+        center /= _parent.boids.Count;
+        return (center - this._position) / 100;
     }
 
     // Separation: Steer to avoid other Boids within flock
     Vector2 Rule2(List<Boid> flock) {
         Vector2 c = Vector2.zero;
         foreach (Boid boid in flock) {
-            Vector2 diff = boid.position - this.position;
-            if (diff.magnitude < parent.separationRange)
+            Vector2 diff = boid._position - this._position;
+            if (diff.magnitude < _parent.separationRange)
                 c -= diff;
         }
 
@@ -111,16 +111,16 @@ public class Boid : MonoBehaviour {
 
         Vector2 perceived = Vector2.zero;
         foreach (Boid boid in flock)
-            perceived += boid.velocity;
+            perceived += boid._velocity;
         perceived /= flock.Count;
-        return (perceived - velocity) / 8;
+        return (perceived - _velocity) / 8;
     }
 
     // Returns a list of boids within a certain radius of the Boid, representing it's local 'flock'
     List<Boid> GetFlock(List<Boid> boids, float radius) {
         List<Boid> flock = new List<Boid>();
         foreach (Boid boid in boids)
-            if (boid != this && Vector2.Distance(this.position, boid.position) <= radius)
+            if (boid != this && Vector2.Distance(this._position, boid._position) <= radius)
                 flock.Add(boid);
         return flock;
     }
