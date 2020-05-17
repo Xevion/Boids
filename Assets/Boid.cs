@@ -9,13 +9,14 @@ using Random = UnityEngine.Random;
 public class Boid : MonoBehaviour {
     [NonSerialized] public Vector2 position = Vector2.zero;
     public Vector2 velocity;
-    [NonSerialized] public Renderer[] renderers;
     [NonSerialized] public bool IsWrappingX = false;
     [NonSerialized] public bool IsWrappingY = false;
+    private BoidController parent;
 
     void Start() {
-        velocity = new Vector2(0.03f * Random.value < 0.5 ? 1 : -1, 0.03f * Random.value < 0.5 ? 1 : -1);
-        renderers = GetComponents<Renderer>();
+        parent = transform.parent.GetComponent<BoidController>();
+        // Acquire a Velocity Vector with a magnitude
+        velocity = GetRandomVelocity(parent.boidStartVelocity);
     }
 
     void Update() {
@@ -24,29 +25,32 @@ public class Boid : MonoBehaviour {
     }
     
     public Vector2 NextPosition(List<Boid> boids, float[] magnitudes) {
+        // Skip Flock Calculations if wrapping in progress
         if (IsWrappingX || IsWrappingY)
             return position + velocity;
         
-        // Acquires all
-        List<Boid> flock = GetFlock(boids, 20);
+        // Acquires all Boids within the local flock
+        List<Boid> flock = GetFlock(parent.boids, parent.boidGroupRange);
 
         if (flock.Count > 0) {
             // Calculate all offsets and multiple by magnitudes given
-            Vector2 r1 = Rule1(flock) * magnitudes[0];
-            Vector2 r2 = Rule2(flock) * magnitudes[1];
-            Vector2 r3 = Rule3(flock) * magnitudes[2];
+            Vector2 r1 = Rule1(flock) * parent.cohesionBias;
+            Vector2 r2 = Rule2(flock) * parent.separationBias;
+            Vector2 r3 = Rule3(flock) * parent.alignmentBias;
             velocity += r1 + r2 + r3;
         }
 
-        LimitVelocity();
+        // Limit the Velocity Vector to a certain Magnitude
+        if (velocity.magnitude > parent.boidVelocityLimit) {
+            velocity = (velocity / velocity.magnitude) * parent.boidVelocityLimit;
+        }
 
         return position + velocity;
     }
 
-    void LimitVelocity() {
-        if (velocity.magnitude > 2f) {
-            velocity = (velocity / velocity.magnitude) * 2f;
-        }
+    Vector2 GetRandomVelocity(float magnitude) {
+        Vector2 vector = new Vector2(magnitude, magnitude);
+        return Util.RotateBy(vector, Random.Range(0, 180));
     }
 
     // Cohesion: Steer towards center of mass of flock

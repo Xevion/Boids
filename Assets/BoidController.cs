@@ -11,7 +11,8 @@ public class BoidController : MonoBehaviour {
     // Swarm Attributes
     public int boidCount = 50;
     public float boidGroupRange = 1.0f;
-    public float boidVelocity = 0.005f;
+    public float boidStartVelocity = 0.005f;
+    public float boidVelocityLimit = 2.0f;
 
     // Bias changes how different rules influence individual Boids more or less
     public float separationBias = 1.0f;
@@ -59,16 +60,13 @@ public class BoidController : MonoBehaviour {
                 // Activate Wrap, Move
                 Vector2 newPosition = boid.transform.position;
                 Vector3 viewportPosition = _cam.WorldToViewportPoint(newPosition);
-                print($"{boid.IsWrappingX} {boid.IsWrappingY} {viewportPosition}");
                 
                 if (!boid.IsWrappingX && (viewportPosition.x > 1 || viewportPosition.x < 0)) {
-                    print("WrappingX");
                     newPosition.x = -newPosition.x;
                     boid.IsWrappingX = true;
                 }
 
                 if (!boid.IsWrappingY && (viewportPosition.y > 1 || viewportPosition.y < 0)) {
-                    print("WrappingY");
                     newPosition.y = -newPosition.y;
                     boid.IsWrappingY = true;
                 }
