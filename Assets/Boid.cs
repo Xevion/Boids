@@ -14,10 +14,12 @@ public class Boid : MonoBehaviour {
     [NonSerialized] private bool _isWrappingX = false;
     [NonSerialized] private bool _isWrappingY = false;
     [NonSerialized] private Renderer[] _renderers;
+    [NonSerialized] private Vector2 _centeringVelocity;
     private BoidController _parent;
 
     void Start() {
-        _parent = transform.parent.GetComponent<BoidController>(); // Parent used to perform physics math without caching
+        _parent = transform.parent
+            .GetComponent<BoidController>(); // Parent used to perform physics math without caching
         _renderers = transform.GetComponents<Renderer>(); // Acquire Renderer(s) to check for Boid visibility
         _velocity = GetRandomVelocity(_parent.boidStartVelocity); // Acquire a Velocity Vector with a magnitude
         _position = transform.position; // Track 2D position separately
@@ -25,38 +27,41 @@ public class Boid : MonoBehaviour {
     }
 
     void OnDrawGizmos() {
-        Handles.color = _isWrappingX || _isWrappingY ? Color.red : Color.white;
-        Vector3 viewportPosition = _parent.cam.WorldToViewportPoint(transform.position);
-        Handles.Label(transform.position, $"{(Vector2) viewportPosition} {(_isWrappingX ? "Y" : "N")} {(_isWrappingY ? "Y" : "N")}");
+        // Handles.color = _isWrappingX || _isWrappingY ? Color.red : Color.white;
+        // Vector3 viewportPosition = _parent.cam.WorldToViewportPoint(transform.position);
+        // Handles.Label(transform.position,
+            // $"{(Vector2) viewportPosition} {(_isWrappingX ? "Y" : "N")} {(_isWrappingY ? "Y" : "N")}");
+            var transform_ = transform;
+            Handles.Label(transform_.position, $"{transform_.name}");
     }
 
-     void Update() {
+    void Update() {
         // Updates the rotation of the object based on the Velocity
         transform.rotation = Quaternion.Euler(0, 0, Mathf.Rad2Deg * -Mathf.Atan2(_velocity.x, _velocity.y));
 
         // Skip Flock Calculations if wrapping in progress
         if (_isWrappingX || _isWrappingY) {
-            _position += _velocity;
+            UpdateCenteringVelocity();
+            _position += _centeringVelocity;
             transform.position = _position;
         }
+        else {
+            List<Boid> flock = _parent.localFlocks ? GetFlock(_parent.boids, _parent.boidGroupRange) : _parent.boids;
 
-        List<Boid> flock = _parent.localFlocks ? GetFlock(_parent.boids, _parent.boidGroupRange) : _parent.boids;
-        
-        if (flock.Count > 0) {
             // Calculate all offsets and multiple by magnitudes given
-            Vector2 r1 = Rule1(flock) * _parent.cohesionBias;
-            Vector2 r2 = Rule2(flock) * _parent.separationBias;
-            Vector2 r3 = Rule3(flock) * _parent.alignmentBias;
-            _velocity += r1 + r2 + r3;
-        }
+            if (flock.Count > 0) {
+                Vector2 r1 = Rule1(flock) * _parent.cohesionBias;
+                Vector2 r2 = Rule2(flock) * _parent.separationBias;
+                Vector2 r3 = Rule3(flock) * _parent.alignmentBias;
+                _velocity += r1 + r2 + r3;
+            }
 
-        // Limit the Velocity Vector to a certain Magnitude
-        if (_velocity.magnitude > _parent.boidVelocityLimit) {
-            _velocity = (_velocity / _velocity.magnitude) * _parent.boidVelocityLimit;
-        }
+            // Limit the Velocity Vector to a certain Magnitude
+            _velocity = Util.LimitVelocity(_velocity, _parent.boidVelocityLimit);
 
-        _position += _velocity;
-        transform.position = new Vector3(_position.x, _position.y, 0);
+            _position += _velocity;
+            transform.position = new Vector3(_position.x, _position.y, 0);
+        }
 
         Wrapping();
     }
@@ -70,11 +75,13 @@ public class Boid : MonoBehaviour {
             if (!_isWrappingX && (viewportPosition.x > 1 || viewportPosition.x < 0)) {
                 newPosition.x = -newPosition.x;
                 _isWrappingX = true;
+                UpdateCenteringVelocity();
             }
 
             if (!_isWrappingY && (viewportPosition.y > 1 || viewportPosition.y < 0)) {
                 newPosition.y = -newPosition.y;
                 _isWrappingY = true;
+                UpdateCenteringVelocity();
             }
 
             transform.position = newPosition;
@@ -87,6 +94,13 @@ public class Boid : MonoBehaviour {
         }
     }
 
+    // When Wrapping, this Velocity directs the Boid to the center of the Rectangle
+    void UpdateCenteringVelocity() {
+        _centeringVelocity = Util.RotateBy(new Vector2(_parent.boidVelocityLimit, _parent.boidVelocityLimit),
+            Vector2.Angle(_position, _parent.Space.center));
+        _centeringVelocity = Util.LimitVelocity(_parent.Space.center - _position, _parent.boidVelocityLimit / 2.0f);
+    }
+    
     Vector2 GetRandomVelocity(float magnitude) {
         Vector2 vector = new Vector2(magnitude, magnitude);
         return Util.RotateBy(vector, Random.Range(0, 180));
@@ -106,7 +120,7 @@ public class Boid : MonoBehaviour {
         Vector2 c = Vector2.zero;
         foreach (Boid boid in flock) {
             Vector2 diff = boid._position - this._position;
-            if (diff.magnitude < _parent.separationRange)
+            if (diff.sqrMagnitude < _parent.separationRange)
                 c -= diff;
         }
 
