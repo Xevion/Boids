@@ -23,32 +23,33 @@ public class Boid : MonoBehaviour {
         transform.rotation = Quaternion.Euler(0, 0, Mathf.Rad2Deg * -Mathf.Atan2(velocity.x, velocity.y));
 
         // Skip Flock Calculations if wrapping in progress
-        if (IsWrappingX || IsWrappingY) {
-            position += velocity;
-            return;
+        if (!IsWrappingX && !IsWrappingY) {
+            // Acquires all Boids within the local flock
+            // List<Boid> flock = GetFlock(parent.boids, parent.boidGroupRange);
+            List<Boid> flock = parent.boids;
+
+            if (flock.Count > 0) {
+                // Calculate all offsets and multiple by magnitudes given
+                Vector2 r1 = Rule1(flock) * parent.cohesionBias;
+                Vector2 r2 = Rule2(flock) * parent.separationBias;
+                Vector2 r3 = Rule3(flock) * parent.alignmentBias;
+                velocity += r1 + r2 + r3;
+            }
+
+            // Limit the Velocity Vector to a certain Magnitude
+            if (velocity.magnitude > parent.boidVelocityLimit) {
+                velocity = (velocity / velocity.magnitude) * parent.boidVelocityLimit;
+            }
+
         }
 
-        // Acquires all Boids within the local flock
-        // List<Boid> flock = GetFlock(parent.boids, parent.boidGroupRange);
-        List<Boid> flock = parent.boids;
-        
-        if (flock.Count > 0) {
-            // Calculate all offsets and multiple by magnitudes given
-            Vector2 r1 = Rule1(flock) * parent.cohesionBias;
-            Vector2 r2 = Rule2(flock) * parent.separationBias;
-            Vector2 r3 = Rule3(flock) * parent.alignmentBias;
-            velocity += r1 + r2 + r3;
-        }
-
-        // Limit the Velocity Vector to a certain Magnitude
-        if (velocity.magnitude > parent.boidVelocityLimit) {
-            velocity = (velocity / velocity.magnitude) * parent.boidVelocityLimit;
-        }
-
+        // Update 2D and 3D transform positions based on current velocity
         position += velocity;
         transform.position = new Vector3(position.x, position.y, 0);
 
-        Wrapping();
+        // If either dimension of wrapping is still unlocked, check wrapping code.
+        if(!IsWrappingX || !IsWrappingY)
+            Wrapping();
     }
 
     void Wrapping() {
