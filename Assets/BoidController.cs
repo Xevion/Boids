@@ -18,12 +18,13 @@ public class BoidController : MonoBehaviour {
     public float separationBias = 0.05f;
     public float alignmentBias = 0.05f;
     public float cohesionBias = 0.05f;
+    public bool localFlocks = true;
 
     // Boid Object Prefab
     public GameObject boidObject;
 
     // Boid Objects for Updates
-    [HideInInspector] public List<Boid> boids = new List<Boid>();
+    [NonSerialized] [HideInInspector] public List<Boid> boids = new List<Boid>();
 
     // Used for wrapping
     public Camera cam;

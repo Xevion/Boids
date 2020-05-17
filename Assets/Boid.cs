@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices;
 using UnityEditor;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -38,9 +40,7 @@ public class Boid : MonoBehaviour {
             transform.position = _position;
         }
 
-        // Acquires all Boids within the local flock
-        // List<Boid> flock = GetFlock(parent.boids, parent.boidGroupRange);
-        List<Boid> flock = _parent.boids;
+        List<Boid> flock = _parent.localFlocks ? GetFlock(_parent.boids, _parent.boidGroupRange) : _parent.boids;
         
         if (flock.Count > 0) {
             // Calculate all offsets and multiple by magnitudes given
@@ -98,7 +98,7 @@ public class Boid : MonoBehaviour {
         foreach (Boid boid in flock)
             center += boid._position;
         center /= _parent.boids.Count;
-        return (center - this._position) / 100;
+        return (center - this._position) / 100.0f;
     }
 
     // Separation: Steer to avoid other Boids within flock
@@ -122,15 +122,11 @@ public class Boid : MonoBehaviour {
         foreach (Boid boid in flock)
             perceived += boid._velocity;
         perceived /= flock.Count;
-        return (perceived - _velocity) / 8;
+        return (perceived - _velocity) / 8.0f;
     }
 
     // Returns a list of boids within a certain radius of the Boid, representing it's local 'flock'
     List<Boid> GetFlock(List<Boid> boids, float radius) {
-        List<Boid> flock = new List<Boid>();
-        foreach (Boid boid in boids)
-            if (boid != this && Vector2.Distance(this._position, boid._position) <= radius)
-                flock.Add(boid);
-        return flock;
+        return boids.Where(boid => boid != this && Vector2.Distance(this._position, boid._position) <= radius).ToList();
     }
 }
