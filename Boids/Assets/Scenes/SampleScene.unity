@@ -232,7 +232,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7d72224fef7a4fb4a998b0980fe0eb77, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  boidCount: 100
+  boidCount: 153
   boidGroupRange: 3.6
   boidStartVelocity: 0.05
   boidVelocityLimit: 0.3
