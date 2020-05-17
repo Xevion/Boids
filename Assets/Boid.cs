@@ -1,71 +1,32 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Analytics;
+using Random = UnityEngine.Random;
 
 // Boids are represented by a moving, rotating triangle.
 // Boids should communicate with sibling Boids
 public class Boid : MonoBehaviour {
-    public Vector2 position = Vector2.zero;
+    [NonSerialized] public Vector2 position = Vector2.zero;
     public Vector2 velocity;
-    private Renderer[] _renderers;
-    bool _isWrappingX = false;
-    bool _isWrappingY = false;
-    Camera _cam;
-    Vector3 _viewportPosition;
+    [NonSerialized] public Renderer[] renderers;
+    [NonSerialized] public bool IsWrappingX = false;
+    [NonSerialized] public bool IsWrappingY = false;
 
     void Start() {
         velocity = new Vector2(0.03f * Random.value < 0.5 ? 1 : -1, 0.03f * Random.value < 0.5 ? 1 : -1);
-        _renderers = GetComponents<Renderer>();
-        _cam = Camera.main;
-        _viewportPosition = _cam.WorldToViewportPoint(transform.position);
+        renderers = GetComponents<Renderer>();
     }
 
     void Update() {
         // Updates the rotation of the object based on the Velocity
         transform.rotation = Quaternion.Euler(0, 0, Mathf.Rad2Deg * -Mathf.Atan2(velocity.x, velocity.y));
-        ScreenWrap();
     }
-
-    bool CheckRenderers() {
-        foreach (var renderer in _renderers) {
-            // If at least one render is visible, return true
-            if (renderer.isVisible) {
-                return true;
-            }
-        }
-
-        // Otherwise, the object is invisible
-        return false;
-    }
-
-    void ScreenWrap() {
-        var isVisible = CheckRenderers();
-
-        if (isVisible) {
-            _isWrappingX = false;
-            _isWrappingY = false;
-            return;
-        }
-
-        if (_isWrappingX && _isWrappingY) {
-            return;
-        }
-        var newPosition = transform.position;
-
-        if (!_isWrappingX && (_viewportPosition.x > 1 || _viewportPosition.x < 0)) {
-            newPosition.x = -newPosition.x;
-            _isWrappingX = true;
-        }
-
-        if (!_isWrappingY && (_viewportPosition.y > 1 || _viewportPosition.y < 0)) {
-            newPosition.y = -newPosition.y;
-            _isWrappingY = true;
-        }
-
-        transform.position = newPosition;
-    }
-
+    
     public Vector2 NextPosition(List<Boid> boids, float[] magnitudes) {
+        if (IsWrappingX || IsWrappingY)
+            return position + velocity;
+        
         // Acquires all
         List<Boid> flock = GetFlock(boids, 20);
 
