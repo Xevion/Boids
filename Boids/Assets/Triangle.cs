@@ -1,10 +1,11 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 public class Triangle : MonoBehaviour {
-    public Color fillColor = Color.blue;
+    [NonSerialized] public Color FillColor = Color.red;
     
     private void Start () {
         // Create Vector2 vertices
@@ -21,7 +22,7 @@ public class Triangle : MonoBehaviour {
         var indices =  triangulator.Triangulate();
 		
         // Generate a color for each vertex
-        var colors = Enumerable.Repeat(fillColor, vertices3D.Length).ToArray();
+        var colors = Enumerable.Repeat(FillColor, vertices3D.Length).ToArray();
 
         // Create the mesh
         var mesh = new Mesh {

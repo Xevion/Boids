@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 using Debug = System.Diagnostics.Debug;
 using Random = UnityEngine.Random;
@@ -7,6 +8,7 @@ using Random = UnityEngine.Random;
 public class BoidController : MonoBehaviour {
     // Controller Attributes
     [NonSerialized] public Rect Space;
+    [NonSerialized] public Rect Boundary;
 
     // Swarm Attributes
     public int boidCount = 50;
@@ -16,10 +18,13 @@ public class BoidController : MonoBehaviour {
     public float boidSeparationRange = 2.3f;
 
     // Bias changes how different rules influence individual Boids more or less
-    public float separationBias = 0.05f;
-    public float alignmentBias = 0.05f;
-    public float cohesionBias = 0.05f;
-    public bool localFlocks = true;
+    [SerializeField] public float separationBias = 0.05f;
+    [SerializeField] public float alignmentBias = 0.05f;
+    [SerializeField] public float cohesionBias = 0.05f;
+    [SerializeField] public float boundaryBias = 1f;
+    [SerializeField] public float boundaryForce = 10f;
+    [SerializeField] public bool localFlocks = true;
+    [SerializeField] public bool edgeWrapping = true;
 
     public Boid focusedBoid; // A focused Boid has special rendering
     public GameObject boidObject; // Boid Object Prefab
@@ -29,12 +34,16 @@ public class BoidController : MonoBehaviour {
     private void OnDrawGizmos() {
         // Draw a Wire Cube for the Rectangle Area
         Gizmos.DrawWireCube(Space.center, Space.size);
+        Gizmos.DrawWireCube(Boundary.center, Boundary.size);
+
+        if (focusedBoid != null)
+            Handles.DrawWireDisc(focusedBoid.transform.position, Vector3.forward, boidGroupRange);
 
         if (Cam == null)
             return;
 
         // Draw a Wire Cube for the Cam's Viewport Area
-        var position = transform.position;
+        Vector3 position = transform.position;
         Vector3 screenBottomLeft = Cam.ViewportToWorldPoint(new Vector3(0, 0, position.z));
         Vector3 screenTopRight = Cam.ViewportToWorldPoint(new Vector3(1, 1, position.z));
         var screenWidth = screenTopRight.x - screenBottomLeft.x;
@@ -48,9 +57,11 @@ public class BoidController : MonoBehaviour {
 
         // Size the Rectangle based on the Camera's Orthographic View
         float height = 2f * Cam.orthographicSize;
-        Vector2 size = new Vector2(height * Cam.aspect, height);
+        var size = new Vector2(height * Cam.aspect, height);
         Space = new Rect((Vector2) transform.position - size / 2, size);
-
+        Boundary = new Rect(Vector2.zero, Space.size * 0.95f);
+        Boundary.center = Space.center;
+        
         AddBoids(boidCount);
     }
 
@@ -89,7 +100,7 @@ public class BoidController : MonoBehaviour {
 
     private Vector2 RandomPosition() {
         return new Vector2(
-            Random.Range(-Space.size.x, Space.size.x) / 2,
-            Random.Range(-Space.size.y, Space.size.y) / 2);
+            Random.Range(-Boundary.size.x, Boundary.size.x) / 2,
+            Random.Range(-Boundary.size.y, Boundary.size.y) / 2);
     }
 }

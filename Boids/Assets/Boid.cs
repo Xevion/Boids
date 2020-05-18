@@ -27,10 +27,10 @@ public class Boid : MonoBehaviour {
         transform.name = $"Boid {transform.GetSiblingIndex()}"; // Name the Game Object so Boids can be tracked somewhat
     }
 
-void OnDrawGizmos() {
+    void OnDrawGizmos() {
         var transform_ = transform;
         Handles.Label(transform_.position, $"{transform_.name} {_latestNeighborhoodCount}");
-}
+    }
 
     void Update() {
         // Updates the rotation of the object based on the Velocity
@@ -47,11 +47,17 @@ void OnDrawGizmos() {
             _latestNeighborhoodCount = flock.Count;
 
             // Calculate all offsets and multiple by magnitudes given
+            Vector2 r1, r2, r3, r4;
+            r4 = _parent.Boundary.Contains(_position) ? Vector2.zero : RuleBound() * _parent.boundaryBias;
+
             if (flock.Count > 0) {
-                Vector2 r1 = Rule1(flock) * _parent.cohesionBias;
-                Vector2 r2 = Rule2(flock) * _parent.separationBias;
-                Vector2 r3 = Rule3(flock) * _parent.alignmentBias;
-                _velocity += r1 + r2 + r3;
+                r1 = Rule1(flock) * _parent.cohesionBias;
+                r2 = Rule2(flock) * _parent.separationBias;
+                r3 = Rule3(flock) * _parent.alignmentBias;
+                _velocity += r1 + r2 + r3 + r4;
+            }
+            else {
+                _velocity += r4;
             }
 
             // Limit the Velocity Vector to a certain Magnitude
@@ -61,10 +67,11 @@ void OnDrawGizmos() {
             transform.position = new Vector3(_position.x, _position.y, 0);
         }
 
-        Wrapping();
+        if (_parent.edgeWrapping)
+            Wrapping();
     }
 
-    void Wrapping() {
+    private void Wrapping() {
         if (!_parent.Space.Contains(_position)) {
             // Activate Wrap, Move
             Vector2 newPosition = transform.position;
@@ -93,20 +100,20 @@ void OnDrawGizmos() {
     }
 
     // When Wrapping, this Velocity directs the Boid to the center of the Rectangle
-    void UpdateCenteringVelocity() {
+    private void UpdateCenteringVelocity() {
         _centeringVelocity = Util.RotateBy(new Vector2(_parent.boidVelocityLimit, _parent.boidVelocityLimit),
             Vector2.Angle(_position, _parent.Space.center));
         _centeringVelocity = Util.LimitVelocity(_parent.Space.center - _position, _parent.boidVelocityLimit / 2.0f);
     }
-    
+
     // Returns a velocity (Vector2) at a random angle with a specific overall magnitude
-    Vector2 GetRandomVelocity(float magnitude) {
+    private Vector2 GetRandomVelocity(float magnitude) {
         Vector2 vector = new Vector2(magnitude, magnitude);
         return Util.RotateBy(vector, Random.Range(0, 180));
     }
 
     // Cohesion: Steer towards center of mass of flock
-    Vector2 Rule1(List<Boid> flock) {
+    private Vector2 Rule1(List<Boid> flock) {
         Vector2 center = Vector2.zero;
         foreach (Boid boid in flock)
             center += boid._position;
@@ -115,7 +122,7 @@ void OnDrawGizmos() {
     }
 
     // Separation: Steer to avoid other Boids within flock
-    Vector2 Rule2(List<Boid> flock) {
+    private Vector2 Rule2(List<Boid> flock) {
         Vector2 c = Vector2.zero;
         foreach (Boid boid in flock) {
             Vector2 diff = boid._position - this._position;
@@ -127,7 +134,7 @@ void OnDrawGizmos() {
     }
 
     // Alignment: Steer to align with the average heading of the flock
-    Vector3 Rule3(List<Boid> flock) {
+    public Vector2 Rule3(List<Boid> flock) {
         if (flock.Count == 0)
             return Vector2.zero;
 
@@ -138,8 +145,27 @@ void OnDrawGizmos() {
         return (perceived - _velocity) / 8.0f;
     }
 
+    // Asks Boids to stay within the Boundaries set
+    private Vector2 RuleBound() {
+        Vector2 vector = Vector2.zero;
+
+        // Boundary X Force
+        if (_position.x < _parent.Boundary.xMin)
+            vector.x = _parent.boundaryForce;
+        else if (_position.x > _parent.Boundary.xMax)
+            vector.x = -_parent.boundaryForce;
+
+        // Boundary Y Force
+        if (_position.y < _parent.Boundary.yMin)
+            vector.y = _parent.boundaryForce;
+        else if (_position.y > _parent.Boundary.yMax)
+            vector.y = -_parent.boundaryForce;
+
+        return vector;
+    }
+
     // Returns a list of boids within a certain radius of the Boid, representing it's local 'flock'
-    List<Boid> GetFlock(List<Boid> boids, float radius) {
+    private List<Boid> GetFlock(List<Boid> boids, float radius) {
         return boids.Where(boid => boid != this && Vector2.Distance(this._position, boid._position) <= radius).ToList();
     }
 }
