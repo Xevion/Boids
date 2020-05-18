@@ -13,7 +13,7 @@ public class BoidController : MonoBehaviour {
     public float boidGroupRange = 1.0f;
     public float boidStartVelocity = 0.005f;
     public float boidVelocityLimit = 1.0f;
-    public float separationRange = 2.3f;
+    public float boidSeparationRange = 2.3f;
 
     // Bias changes how different rules influence individual Boids more or less
     public float separationBias = 0.05f;
@@ -67,7 +67,6 @@ public class BoidController : MonoBehaviour {
     }
 
     public void RemoveBoids(int n) {
-        print($"Removing {n} boids");
         while (n-- > 0 && boids.Count >= 1) {
             int index = Random.Range(0, boids.Count - 1);
 

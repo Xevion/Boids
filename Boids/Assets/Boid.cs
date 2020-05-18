@@ -119,7 +119,7 @@ void OnDrawGizmos() {
         Vector2 c = Vector2.zero;
         foreach (Boid boid in flock) {
             Vector2 diff = boid._position - this._position;
-            if (diff.sqrMagnitude < _parent.separationRange)
+            if (diff.sqrMagnitude < _parent.boidSeparationRange)
                 c -= diff;
         }
 
