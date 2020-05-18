@@ -15,6 +15,7 @@ public class Boid : MonoBehaviour {
     [NonSerialized] private bool _isWrappingY = false;
     [NonSerialized] private Renderer[] _renderers;
     [NonSerialized] private Vector2 _centeringVelocity;
+    [NonSerialized] private int _latestNeighborhoodCount = 0;
     private BoidController _parent;
 
     void Start() {
@@ -26,14 +27,10 @@ public class Boid : MonoBehaviour {
         transform.name = $"Boid {transform.GetSiblingIndex()}"; // Name the Game Object so Boids can be tracked somewhat
     }
 
-    void OnDrawGizmos() {
-        // Handles.color = _isWrappingX || _isWrappingY ? Color.red : Color.white;
-        // Vector3 viewportPosition = _parent.cam.WorldToViewportPoint(transform.position);
-        // Handles.Label(transform.position,
-            // $"{(Vector2) viewportPosition} {(_isWrappingX ? "Y" : "N")} {(_isWrappingY ? "Y" : "N")}");
-            var transform_ = transform;
-            Handles.Label(transform_.position, $"{transform_.name}");
-    }
+void OnDrawGizmos() {
+        var transform_ = transform;
+        Handles.Label(transform_.position, $"{transform_.name} {_latestNeighborhoodCount}");
+}
 
     void Update() {
         // Updates the rotation of the object based on the Velocity
@@ -47,6 +44,7 @@ public class Boid : MonoBehaviour {
         }
         else {
             List<Boid> flock = _parent.localFlocks ? GetFlock(_parent.boids, _parent.boidGroupRange) : _parent.boids;
+            _latestNeighborhoodCount = flock.Count;
 
             // Calculate all offsets and multiple by magnitudes given
             if (flock.Count > 0) {
@@ -70,7 +68,7 @@ public class Boid : MonoBehaviour {
         if (!_parent.Space.Contains(_position)) {
             // Activate Wrap, Move
             Vector2 newPosition = transform.position;
-            Vector3 viewportPosition = _parent.cam.WorldToViewportPoint(newPosition);
+            Vector3 viewportPosition = _parent.Cam.WorldToViewportPoint(newPosition);
 
             if (!_isWrappingX && (viewportPosition.x > 1 || viewportPosition.x < 0)) {
                 newPosition.x = -newPosition.x;
@@ -101,6 +99,7 @@ public class Boid : MonoBehaviour {
         _centeringVelocity = Util.LimitVelocity(_parent.Space.center - _position, _parent.boidVelocityLimit / 2.0f);
     }
     
+    // Returns a velocity (Vector2) at a random angle with a specific overall magnitude
     Vector2 GetRandomVelocity(float magnitude) {
         Vector2 vector = new Vector2(magnitude, magnitude);
         return Util.RotateBy(vector, Random.Range(0, 180));
