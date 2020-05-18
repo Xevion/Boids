@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 public class Triangle : MonoBehaviour {
     [NonSerialized] public Color FillColor = Color.red;
-    
+    public MeshRenderer meshRenderer;
+
     private void Start () {
         // Create Vector2 vertices
         var vertices2D = new Vector2[] {
@@ -35,7 +34,7 @@ public class Triangle : MonoBehaviour {
         mesh.RecalculateBounds();
  
         // Set up game object with mesh;
-        var meshRenderer = gameObject.AddComponent<MeshRenderer>();
+        meshRenderer = gameObject.AddComponent<MeshRenderer>();
         meshRenderer.material = (Material) Resources.Load("BoidMaterial");
 		
         var filter = gameObject.AddComponent<MeshFilter>();

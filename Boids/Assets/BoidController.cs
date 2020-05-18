@@ -51,6 +51,21 @@ public class BoidController : MonoBehaviour {
         Gizmos.DrawWireCube(Cam.transform.position, new Vector3(screenWidth, screenHeight, 1));
     }
 
+    void Update() {
+        // Focus a different Boid
+        if (Input.GetKeyDown("space")) {
+            // Undo previous Boid's focus
+            if (focusedBoid != null) {
+                var oldTriangle = focusedBoid.transform.GetComponent<Triangle>();
+                oldTriangle.meshRenderer.material.color = new Color32(49, 61, 178, 255);
+            }
+
+            focusedBoid = boids[Random.Range(0, boids.Count)];
+            var triangle = focusedBoid.transform.GetComponent<Triangle>();
+            triangle.meshRenderer.material.color = Color.red;
+        }
+    }
+
     private void Start() {
         // Setup Camera
         Cam = Camera.main;
@@ -61,7 +76,7 @@ public class BoidController : MonoBehaviour {
         Space = new Rect((Vector2) transform.position - size / 2, size);
         Boundary = new Rect(Vector2.zero, Space.size * 0.95f);
         Boundary.center = Space.center;
-        
+
         AddBoids(boidCount);
     }
 

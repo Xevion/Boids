@@ -27,10 +27,10 @@ public class Boid : MonoBehaviour {
         transform.name = $"Boid {transform.GetSiblingIndex()}"; // Name the Game Object so Boids can be tracked somewhat
     }
 
-    void OnDrawGizmos() {
-        var transform_ = transform;
-        Handles.Label(transform_.position, $"{transform_.name} {_latestNeighborhoodCount}");
-    }
+    // void OnDrawGizmos() {
+    //     var transform_ = transform;
+    //     Handles.Label(transform_.position, $"{transform_.name} {_latestNeighborhoodCount}");
+    // }
 
     void Update() {
         // Updates the rotation of the object based on the Velocity
@@ -151,16 +151,16 @@ public class Boid : MonoBehaviour {
 
         // Boundary X Force
         if (_position.x < _parent.Boundary.xMin)
-            vector.x = _parent.boundaryForce;
+            vector.x = _parent.boundaryForce * Mathf.InverseLerp(_parent.Boundary.xMin, _parent.Space.xMin, _position.x);
         else if (_position.x > _parent.Boundary.xMax)
-            vector.x = -_parent.boundaryForce;
+            vector.x = -_parent.boundaryForce * Mathf.InverseLerp(_parent.Boundary.xMax, _parent.Space.xMax, _position.x);
 
         // Boundary Y Force
         if (_position.y < _parent.Boundary.yMin)
-            vector.y = _parent.boundaryForce;
+            vector.y = _parent.boundaryForce * Mathf.InverseLerp(_parent.Boundary.yMin, _parent.Space.yMin, _position.y);
         else if (_position.y > _parent.Boundary.yMax)
-            vector.y = -_parent.boundaryForce;
-
+            vector.y = -_parent.boundaryForce * Mathf.InverseLerp(_parent.Boundary.yMax, _parent.Space.yMax, _position.y);
+        print($"Boundary Vector: {vector}");
         return vector;
     }
 
