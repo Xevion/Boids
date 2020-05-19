@@ -23,7 +23,7 @@ public class BoidController : MonoBehaviour {
     [SerializeField] public float cohesionBias = 0.05f;
     [SerializeField] public float boundaryBias = 1f;
 
-    // Enable/Disable Boid Rules
+    // Enable/Disable Boid Rules Altogether
     [SerializeField] public bool enableSeparation = true;
     [SerializeField] public bool enableAlignment = true;
     [SerializeField] public bool enableCohesion = true;

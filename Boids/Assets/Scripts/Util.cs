@@ -9,11 +9,15 @@ public class Util {
         return new Vector2((float) rx, (float) (v.x * sa + v.y * ca));
     }
 
-    public static Vector2 LimitVelocity(Vector2 v, float max) {
-        if (v.magnitude > max) {
+    public static Vector2 MaxVelocity(Vector2 v, float max) {
+        if (v.sqrMagnitude > max * max)
             v = (v / v.magnitude) * max;
-        }
+        return v;
+    }
 
+    public static Vector2 MinVelocity(Vector2 v, float min) {
+        if (v.sqrMagnitude > min * min)
+            v = (v / v.magnitude) * min;
         return v;
     }
 

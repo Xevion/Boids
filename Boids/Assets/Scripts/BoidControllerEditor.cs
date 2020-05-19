@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿#if UNITY_EDITOR
+using UnityEditor;
 using UnityEngine;
 
 [CustomEditor(typeof(BoidController))]
@@ -44,3 +45,4 @@ public class BoidControllerEditor : Editor {
         controller.circleWidth = EditorGUILayout.Slider("Circle Line Width", controller.circleWidth, 0.01f, 1f);
     }
 }
+#endif
