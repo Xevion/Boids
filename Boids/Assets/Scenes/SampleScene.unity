@@ -233,17 +233,27 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   boidCount: 153
-  boidGroupRange: 3.6
+  boidGroupRange: 2.69
   boidStartVelocity: 0.05
   boidVelocityLimit: 0.3
-  separationRange: 2.8
-  separationBias: 0.01
-  alignmentBias: 0.05
+  globalBias: 1
+  separationBias: 0.014
+  alignmentBias: 0.194
   cohesionBias: 0.05
+  boundaryBias: 0.063
+  enableSeparation: 1
+  enableAlignment: 1
+  enableCohesion: 1
+  enableBoundary: 1
+  boidSeparationRange: 5
+  boundaryForce: 0.352
   localFlocks: 1
+  edgeWrapping: 1
+  circleVertexCount: 360
+  circleWidth: 0.1
+  focusedBoid: {fileID: 0}
   boidObject: {fileID: 1737515784064720040, guid: 23e1eaaf69d4ef342ac3ef9590f6c642,
     type: 3}
-  cam: {fileID: 519420031}
 --- !u!4 &1321165554
 Transform:
   m_ObjectHideFlags: 0
