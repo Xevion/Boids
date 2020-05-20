@@ -44,7 +44,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 39c543193832a9745a8985fb0e672377, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fillColor: {r: 0, g: 0, b: 1, a: 1}
+  material: {fileID: 2100000, guid: 475251ab2c9abbc47a59428d1c3a3b24, type: 2}
+  meshRenderer: {fileID: 0}
 --- !u!114 &1737515784064720087
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -57,5 +58,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8fa9bbc6d9eb4c368be190feba139e7c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  position: {x: 0, y: 0}
-  velocity: {x: 0.05, y: 0.05}
