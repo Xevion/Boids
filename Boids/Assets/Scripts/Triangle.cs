@@ -3,8 +3,9 @@ using System.Linq;
 using UnityEngine;
 
 public class Triangle : MonoBehaviour {
+    public Material material;
     [NonSerialized] public Color FillColor = Color.red;
-    public MeshRenderer meshRenderer;
+    [HideInInspector] public MeshRenderer meshRenderer;
 
     private void Start () {
         // Create Vector2 vertices
