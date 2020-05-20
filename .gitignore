@@ -2,6 +2,7 @@
 .idea/**
 /Boids/.idea/**
 /Boids/Assets/LeanTween/**
+/Boids/Assets/TextMesh Pro/**
 
 # This .gitignore file should be placed at the root of your Unity project directory
 #
