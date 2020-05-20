@@ -64,7 +64,7 @@ public class BoidController : MonoBehaviour {
         Gizmos.DrawWireCube(Cam.transform.position, new Vector3(screenWidth, screenHeight, 1));
     }
 
-    void Update() {
+    private void Update() {
         // Focus a different Boid
         if (Input.GetKeyDown("space")) {
             // Undo previous Boid's focus
@@ -72,7 +72,7 @@ public class BoidController : MonoBehaviour {
                 focusedBoid.DisableFocusing();
 
             focusedBoid = boids[Random.Range(0, boids.Count)];
-            focusedBoid.enableFocusing();
+            focusedBoid.EnableFocusing();
         }
     }
 

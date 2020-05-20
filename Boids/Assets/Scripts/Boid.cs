@@ -18,21 +18,16 @@ public class Boid : MonoBehaviour {
     [NonSerialized] private BoidController _parent;
     [NonSerialized] public bool isFocused = false;
 
-    void Start() {
+    private void Start() {
         _parent = transform.parent
             .GetComponent<BoidController>(); // Parent used to perform physics math without caching
         _renderers = transform.GetComponents<Renderer>(); // Acquire Renderer(s) to check for Boid visibility
-        _velocity = GetRandomVelocity(_parent.boidStartVelocity); // Acquire a Velocity Vector with a magnitude
+        _velocity = Util.GetRandomVelocity(_parent.boidStartVelocity); // Acquire a Velocity Vector with a magnitude
         _position = transform.position; // Track 2D position separately
         transform.name = $"Boid {transform.GetSiblingIndex()}"; // Name the Game Object so Boids can be tracked somewhat
     }
 
-    // void OnDrawGizmos() {
-    //     var transform_ = transform;
-    //     Handles.Label(transform_.position, $"{transform_.name} {_latestNeighborhoodCount}");
-    // }
-
-    void Update() {
+    private void Update() {
         // Updates the rotation of the object based on the Velocity
         transform.rotation = Quaternion.Euler(0, 0, Mathf.Rad2Deg * -Mathf.Atan2(_velocity.x, _velocity.y));
 
@@ -56,7 +51,7 @@ public class Boid : MonoBehaviour {
                     _velocity += Rule3(flock) * _parent.alignmentBias;
             }
 
-            if(_parent.enableBoundary && _parent.Boundary.Contains(_position))
+            if (_parent.enableBoundary && _parent.Boundary.Contains(_position))
                 _velocity += RuleBound() * _parent.boundaryBias;
 
             // Limit the Velocity Vector to a certain Magnitude
@@ -105,12 +100,6 @@ public class Boid : MonoBehaviour {
         _centeringVelocity = Util.MaxVelocity(_parent.Space.center - _position, _parent.boidVelocityLimit / 2.0f);
     }
 
-    // Returns a velocity (Vector2) at a random angle with a specific overall magnitude
-    private Vector2 GetRandomVelocity(float magnitude) {
-        Vector2 vector = new Vector2(magnitude, magnitude);
-        return Util.RotateBy(vector, Random.Range(0, 180));
-    }
-
     // Cohesion: Steer towards center of mass of flock
     private Vector2 Rule1(List<Boid> flock) {
         Vector2 center = Vector2.zero;
@@ -133,7 +122,7 @@ public class Boid : MonoBehaviour {
     }
 
     // Alignment: Steer to align with the average heading of the flock
-    public Vector2 Rule3(List<Boid> flock) {
+    private Vector2 Rule3(List<Boid> flock) {
         if (flock.Count == 0)
             return Vector2.zero;
 
@@ -163,6 +152,7 @@ public class Boid : MonoBehaviour {
         else if (_position.y > _parent.Boundary.yMax)
             vector.y = -_parent.boundaryForce *
                        Mathf.InverseLerp(_parent.Boundary.yMax, _parent.Space.yMax, _position.y);
+
         return vector;
     }
 
@@ -172,7 +162,7 @@ public class Boid : MonoBehaviour {
     }
 
     // Sets up a Boid to be 'Focused', adds Circles around object and changes color
-    public void enableFocusing() {
+    public void EnableFocusing() {
         if (isFocused) {
             Debug.LogWarning("enableFocusing called on previously focused Boid");
             return;

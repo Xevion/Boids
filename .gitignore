@@ -1,6 +1,6 @@
 ﻿# Repository
 .idea/**
-/procedural-placement/.idea/**
+/Boids/.idea/**
 
 # This .gitignore file should be placed at the root of your Unity project directory
 #
