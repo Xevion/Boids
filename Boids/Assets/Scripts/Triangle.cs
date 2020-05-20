@@ -36,7 +36,7 @@ public class Triangle : MonoBehaviour {
  
         // Set up game object with mesh;
         meshRenderer = gameObject.AddComponent<MeshRenderer>();
-        meshRenderer.material = (Material) Resources.Load("BoidMaterial");
+        meshRenderer.material = material;
 		
         var filter = gameObject.AddComponent<MeshFilter>();
         filter.mesh = mesh;
