@@ -21,13 +21,6 @@ public class UIController : MonoBehaviour {
     private GameObject[] _aboutElements;
     private GameObject[] _adjustmentElements;
 
-    // Element Group
-    private bool _titleActive = true;
-    private bool _aboutActive = false;
-    private bool _settingsActive = false;
-    private bool _playActive = false;
-    private bool _adjustmentsActive = false;
-
     private UIStance _currentUI;
 
     private enum UIStance {
@@ -78,20 +71,21 @@ public class UIController : MonoBehaviour {
     private void MoveTitleElements(bool away) {
         foreach (GameObject element in _titleElements) {
             LeanTween
-                .move(element, element.transform.position + new Vector3(0, 500 * (away ? 1 : -1), 0), 1f)
-                .setEase(LeanTweenType.easeInCubic);
+                .move(element, element.transform.position + new Vector3(0, 350 * (away ? 1 : -1), 0), away ? 0.75f : 1.15f)
+                .setDelay(away ? 0f : 0.35f)
+                .setEase(away ? LeanTweenType.easeInCubic : LeanTweenType.easeOutCubic);
         }
 
+        // Bottom Right About Button
         LeanTween
-            .move(aboutButton.gameObject, aboutButton.transform.position + new Vector3(100 * (away ? 1 : -1), 0, 0),
-                0.75f)
+            .move(aboutButton.gameObject, aboutButton.transform.position + new Vector3(100 * (away ? 1 : -1), 0, 0), 0.75f)
             .setEase(LeanTweenType.easeInCubic);
     }
 
     // Move About Elements In/Out
     private void MoveAboutElements(bool away) {
         LeanTween
-            .move(aboutPanel.gameObject, aboutPanel.transform.position + new Vector3(760 * (away ? 1 : -1), 0, 0), 1.2f)
+            .move(aboutPanel.gameObject, aboutPanel.transform.position + new Vector3(750 * (away ? 1 : -1), 0, 0), away ? 0.6f : 0.8f)
             .setEase(LeanTweenType.easeInCubic);
     }
 
