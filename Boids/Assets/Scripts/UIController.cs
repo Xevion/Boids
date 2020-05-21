@@ -1,4 +1,5 @@
 ﻿using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,7 +12,7 @@ public class UIController : MonoBehaviour {
     public Button startButton;
     public Button settingsButton;
     public Button aboutButton;
-    public Text titleText;
+    public RectTransform titleText;
 
     // About Screen Elements
     public RectTransform aboutPanel;
