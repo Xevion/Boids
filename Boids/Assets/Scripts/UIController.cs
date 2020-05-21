@@ -17,6 +17,9 @@ public class UIController : MonoBehaviour {
     public RectTransform aboutPanel;
     public Button aboutCloseButton;
 
+    // Adjustment Panel Elements
+    public RectTransform adjPanel;
+    
     // Element Groups
     private GameObject[] _titleElements;
 
@@ -56,10 +59,13 @@ public class UIController : MonoBehaviour {
         _aboutDiff = new Vector3(_canvasRect.size.x * _scaleFactor, 0, 0);
         _aboutButtonDiff = new Vector3(75 * _scaleFactor, 0, 0);
         _titleDiff = new Vector3(0, 450 * _scaleFactor, 0);
+        _adjustmentsDiff = new Vector3(adjPanel.rect.size.x * _scaleFactor, 0, 0);
 
         // Move UI elements into position
-        aboutPanel.transform.position = canvas.transform.position + _aboutDiff;
-
+        Vector3 center = canvas.transform.position;
+        aboutPanel.transform.position = center + _aboutDiff;
+        adjPanel.transform.position = center + new Vector3((_canvasRect.size.x + 10) / 2f *  _scaleFactor, 0, 0) + _adjustmentsDiff / 2f;
+        
         // Group Element Instantiation
         _titleElements = new[] {titleText.gameObject, startButton.gameObject, settingsButton.gameObject};
     }
@@ -81,6 +87,13 @@ public class UIController : MonoBehaviour {
             .setEase(LeanTweenType.easeInOutCubic);
     }
 
+    private void MoveAdjustmentElements(bool away) {
+        LeanTween
+            .move(adjPanel.gameObject, adjPanel.gameObject.transform.position + _adjustmentsDiff * (away ? 1 : -1), 1.15f)
+            .setDelay(away ? 0f : 0.15f)
+            .setEase(LeanTweenType.easeInOutCubic);
+    }
+
     // Move About Elements In/Out
     private void MoveAboutElements(bool away) {
         LeanTween
@@ -94,6 +107,7 @@ public class UIController : MonoBehaviour {
         if (_currentUI == UIStance.Title) {
             Debug.Log($"UI Transition: {_currentUI} -> {UIStance.About}");
             MoveTitleElements(true);
+            MoveAdjustmentElements(false);
         }
     }
 
