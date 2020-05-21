@@ -20,6 +20,10 @@ public class UIController : MonoBehaviour {
     // Adjustment Panel Elements
     public RectTransform adjPanel;
     
+    // Settings Panel Elements
+    public RectTransform settingsPanel;
+    public Button settingsCloseButton;
+    
     // Element Groups
     private GameObject[] _titleElements;
 
@@ -53,18 +57,21 @@ public class UIController : MonoBehaviour {
         startButton.onClick.AddListener(OnStartButton);
         aboutButton.onClick.AddListener(OnAboutButton);
         aboutCloseButton.onClick.AddListener(OnAboutClose);
-        // settingsButton.onClick.AddListener(OnSettingsButton);
-
+        settingsButton.onClick.AddListener(OnSettingsButton);
+        settingsCloseButton.onClick.AddListener(OnSettingsCloseButton);
+        
         // Calculate UI position deltas
         _aboutDiff = new Vector3(_canvasRect.size.x * _scaleFactor, 0, 0);
         _aboutButtonDiff = new Vector3(75 * _scaleFactor, 0, 0);
         _titleDiff = new Vector3(0, 450 * _scaleFactor, 0);
         _adjustmentsDiff = new Vector3(adjPanel.rect.size.x * _scaleFactor, 0, 0);
+        _settingsDiff = new Vector3(_canvasRect.size.x * _scaleFactor * -1,0, 0);
 
         // Move UI elements into position
         Vector3 center = canvas.transform.position;
         aboutPanel.transform.position = center + _aboutDiff;
         adjPanel.transform.position = center + new Vector3((_canvasRect.size.x + 10) / 2f *  _scaleFactor, 0, 0) + _adjustmentsDiff / 2f;
+        settingsPanel.transform.position = center + _settingsDiff;
         
         // Group Element Instantiation
         _titleElements = new[] {titleText.gameObject, startButton.gameObject, settingsButton.gameObject};
@@ -102,12 +109,39 @@ public class UIController : MonoBehaviour {
             .setEase(away ? LeanTweenType.easeInCubic : LeanTweenType.easeOutCubic);
     }
 
+    private void MoveSettingsElements(bool away) {
+        LeanTween
+            .move(settingsPanel.gameObject, settingsPanel.transform.position + _settingsDiff * (away ? 1 : -1),
+                away ? 0.7f : 1.1f)
+            .setDelay(away ? 0.05f : 0.15f)
+            .setEase(away ? LeanTweenType.easeInCubic : LeanTweenType.easeOutCubic);
+    }
+
     // Handle switching to the Play Screen
     private void OnStartButton() {
         if (_currentUI == UIStance.Title) {
             Debug.Log($"UI Transition: {_currentUI} -> {UIStance.About}");
             MoveTitleElements(true);
             MoveAdjustmentElements(false);
+            _currentUI = UIStance.Play;
+        }
+    }
+
+    private void OnSettingsButton() {
+        if (_currentUI == UIStance.Title) {
+            Debug.Log($"UI Transition: {_currentUI} -> {UIStance.Settings}");
+            MoveTitleElements(true);
+            MoveSettingsElements(false);
+            _currentUI = UIStance.Settings;
+        }
+    }
+
+    private void OnSettingsCloseButton() {
+        if (_currentUI == UIStance.Settings) {
+            Debug.Log($"UI Transition: {_currentUI} - > {UIStance.Title}");
+            MoveTitleElements(false);
+            MoveSettingsElements(true);
+            _currentUI = UIStance.Title;
         }
     }
 
