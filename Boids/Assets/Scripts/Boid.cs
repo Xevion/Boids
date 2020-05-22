@@ -176,7 +176,7 @@ public class Boid : MonoBehaviour {
 
         // Add a LineRenderer for Radius Drawing
         DrawCircle(_parent.boidSeparationRange, "Separation Range Circle");
-        // DrawCircle(_parent.boidGroupRange, "Group Range Circle");
+        DrawCircle(_parent.boidGroupRange, "Group Range Circle");
     }
 
     // Disable focusing, removing LineRenderers and resetting color
@@ -212,7 +212,7 @@ public class Boid : MonoBehaviour {
         var points = new Vector3[pointCount];
         for (int i = 0; i < pointCount; i++) {
             var rad = Mathf.Deg2Rad * (i * 360f / _parent.circleVertexCount);
-            points[i] = new Vector3(Mathf.Sin(rad) * radius, 0, Mathf.Cos(rad) * radius);
+            points[i] = new Vector3(Mathf.Sin(rad) * radius, Mathf.Cos(rad) * radius, 0);
         }
 
         // Add points to LineRenderer
