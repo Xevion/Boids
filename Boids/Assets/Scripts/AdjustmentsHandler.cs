@@ -48,6 +48,18 @@ public class AdjustmentsHandler : MonoBehaviour {
         cohesionSlider.onValueChanged.AddListener(_ => UpdateUI(SliderType.Cohesion));
         boundarySlider.onValueChanged.AddListener(_ => UpdateUI(SliderType.Boundary));
         boidCountSlider.onValueChanged.AddListener(_ => UpdateUI(SliderType.BoidCount));
+        
+        // Find Toggle Components
+        _separationToggle = separationSlider.GetComponentInChildren<Toggle>();
+        _alignmentToggle = alignmentSlider.GetComponentInChildren<Toggle>();
+        _cohesionToggle = cohesionSlider.GetComponentInChildren<Toggle>();
+        _boundaryToggle = boundarySlider.GetComponentInChildren<Toggle>();
+        
+        // Register Toggle Callbacks
+        _separationToggle.onValueChanged.AddListener(toggle => controller.enableSeparation = toggle);
+        _alignmentToggle.onValueChanged.AddListener(toggle => controller.enableAlignment = toggle);
+        _cohesionToggle.onValueChanged.AddListener(toggle => controller.enableCohesion = toggle);
+        _boundaryToggle.onValueChanged.AddListener(toggle => controller.enableBoundary = toggle);
     }
 
     private void UpdateUI(SliderType update) {
