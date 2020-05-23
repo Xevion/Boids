@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using JetBrains.Annotations;
+using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -22,6 +23,7 @@ public class UIController : MonoBehaviour {
     // Settings Panel Elements
     public RectTransform settingsPanel;
     public Button settingsCloseButton;
+    public Toggle showBoidsOnTitleToggle;
 
     // Element Groups (populated on Start)
     private GameObject[] _titleElements;
@@ -34,7 +36,7 @@ public class UIController : MonoBehaviour {
     private Rect _canvasRect;
     private float _scaleFactor;
     private int _activeTweens;
-    
+
     /// <summary>
     /// returns <c>True</c> when the UI Stance is locked due to active tweening animations
     /// </summary>
@@ -89,6 +91,9 @@ public class UIController : MonoBehaviour {
         settingsButton.onClick.AddListener(() => ChangeStance(UIStance.Settings));
         settingsCloseButton.onClick.AddListener(() => ChangeStance(UIStance.Title));
         adjCloseButton.onClick.AddListener(() => ChangeStance(UIStance.Title));
+
+        // Settings Menu Callbacks
+        showBoidsOnTitleToggle.onValueChanged.AddListener(ShowBoidsTitle);
 
         // Calculate UI position deltas
         _aboutDiff = new Vector3(_canvasRect.size.x * _scaleFactor, 0, 0);
@@ -159,14 +164,20 @@ public class UIController : MonoBehaviour {
                 MoveElements(UIGroup.SettingsScreen, false);
             else if (stance == UIStance.About)
                 MoveElements(UIGroup.AboutScreen, false);
-            else if (stance == UIStance.PlayAdjust)
+            else if (stance == UIStance.PlayAdjust) {
                 MoveElements(UIGroup.AdjustmentsScreen, false);
+                if (!showBoidsOnTitleToggle.isOn)
+                    ShowBoidsTitle(true);
+            }
         }
         // Settings/About/Play -> Title
         else if (stance == UIStance.Title) {
             MoveElements(UIGroup.TitleScreen, false);
-            if (_currentUI == UIStance.PlayAdjust)
+            if (_currentUI == UIStance.PlayAdjust) {
                 MoveElements(UIGroup.AdjustmentsScreen, true);
+                if(!showBoidsOnTitleToggle.isOn)
+                    ShowBoidsTitle(false);
+            }
             else if (_currentUI == UIStance.Settings)
                 MoveElements(UIGroup.SettingsScreen, true);
             else if (_currentUI == UIStance.About)
@@ -230,5 +241,28 @@ public class UIController : MonoBehaviour {
                     .setOnComplete(StartTween());
                 break;
         }
+    }
+
+    private void ShowBoidsTitle(bool active) {
+        ShowBoids(active);
+        
+        // Works somewhat close to what is needed, but needs a fix.
+        // if (!active) {
+        //     print("Fading out");
+        //     LeanTween
+        //         .alpha(boidController.gameObject, 0f, 0.5f)
+        //         .setEase(LeanTweenType.easeInCubic);
+        // }
+        // else {
+        //     print("Fading in");
+        //     LeanTween
+        //         .alpha(boidController.gameObject, 1f, 0.5f)
+        //         .setEase(LeanTweenType.easeInCubic);
+        // }
+    }
+
+    private void ShowBoids(bool show) {
+        foreach(MeshRenderer meshRenderer in boidController.gameObject.GetComponentsInChildren<MeshRenderer>())
+            meshRenderer.enabled = show;
     }
 }
