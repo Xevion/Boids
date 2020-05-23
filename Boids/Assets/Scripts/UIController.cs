@@ -34,7 +34,6 @@ public class UIController : MonoBehaviour {
     private Rect _canvasRect;
     private float _scaleFactor;
     private int _activeTweens;
-
     private bool _UILock => _activeTweens > 0;
 
     // Element Displacements
@@ -158,16 +157,16 @@ public class UIController : MonoBehaviour {
         _currentUI = stance;
     }
 
-    /// <summary>
-    /// Moves groups of elements back and forth using the LeanTween framework.
+    /// <summary> Moves groups of elements back and forth using the LeanTween framework.
     /// <c>MoveElements</c> is not aware of the current position of the elements at any time,
     /// thus measures must be implemented to track the current 'state' of any elements.
-    ///
+    /// Elements will be moved towards or away from the Canvas depending on the <paramref name="away"/> parameter.
+    /// Calls to <c>MoveElements</c> with the same group but inverted <paramref name="away"/>s should cancel each other out.
     /// Used in conjunction with <see cref="ChangeStance"/> to manipulate the UI elements.
     /// </summary>
-    /// <param name="group">the <c>UIGroup</c> associated with the elements you wish to move</param>
-    /// <param name="away">moves elements away (<c></c>)</param>
-    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    /// <param name="group">used to indicate which elements should be moved</param>
+    /// <param name="away">used to indicate which direction the elements should be moved in</param>
+    /// <seealso cref="ChangeStance"/>
     private void MoveElements(UIGroup group, bool away) {
         switch (group) {
             case UIGroup.TitleScreen:
@@ -211,8 +210,6 @@ public class UIController : MonoBehaviour {
                     .setEase(away ? LeanTweenType.easeInCubic : LeanTweenType.easeOutCubic)
                     .setOnComplete(StartTween());
                 break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(@group), @group, null);
         }
     }
 }
