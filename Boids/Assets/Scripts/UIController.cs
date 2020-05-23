@@ -34,7 +34,7 @@ public class UIController : MonoBehaviour {
     private Rect _canvasRect;
     private float _scaleFactor;
     private int _activeTweens;
-    private bool _UILock => _activeTweens > 0;
+    private bool UILock => _activeTweens > 0;
 
     // Element Displacements
     private Vector3 _aboutDiff;
@@ -43,13 +43,27 @@ public class UIController : MonoBehaviour {
     private Vector3 _settingsDiff;
     private Vector3 _adjustmentsDiff;
 
+    /// <summary> <c>UIStance</c> describes difference 'stances', or UI configurations.
+    /// <see cref="UIController.ChangeStance"/> allows easy change between different stances with the <see cref="UIController.MoveElements"/>
+    /// method. Note, this enum is similar but different from the <see cref="UIGroup"/> Enum.
+    /// </summary>
+    /// <seealso cref="UIController.ChangeStance"/>
+    /// <seealso cref="UIController.MoveElements"/>
     private enum UIStance {
         Title,
-        Play,
+        PlayAdjust,
+        PlayHelp,
+        PlayHidden,
         Settings,
         About
     }
 
+    /// <summary> <c>UIGroup</c> describes distinct groups of UI elements.
+    /// This Enum is used within <see cref="UIController.MoveElements"/> in order to describe specific portions of the application
+    /// compared to a 'UI Stance'.
+    /// <remarks>This Enum may be removed and be functionally replaced with <see cref="UIStance"/> later on.</remarks>
+    /// </summary>
+    /// <seealso cref="UIController.MoveElements"/>
     private enum UIGroup {
         TitleScreen,
         AdjustmentsScreen,
@@ -65,7 +79,7 @@ public class UIController : MonoBehaviour {
         _scaleFactor = Screen.width / _scaler.referenceResolution.x;
 
         // Add stance change functionality to buttons
-        startButton.onClick.AddListener(() => ChangeStance(UIStance.Play));
+        startButton.onClick.AddListener(() => ChangeStance(UIStance.PlayAdjust));
         aboutButton.onClick.AddListener(() => ChangeStance(UIStance.About));
         aboutCloseButton.onClick.AddListener(() => ChangeStance(UIStance.Title));
         settingsButton.onClick.AddListener(() => ChangeStance(UIStance.Settings));
@@ -102,7 +116,7 @@ public class UIController : MonoBehaviour {
     /// <seealso cref="StartTween"/>
     private void TweenEnd() {
         _activeTweens -= 1;
-        if (!_UILock)
+        if (!UILock)
             Debug.Log("Unlocking Stance Changes");
     }
 
@@ -114,7 +128,7 @@ public class UIController : MonoBehaviour {
     /// <returns>returns the <see cref="TweenEnd"/> action for a deconstructing callback</returns>
     /// <seealso cref="TweenEnd"/>
     private Action StartTween() {
-        if (!_UILock)
+        if (!UILock)
             Debug.Log("Locking Stance Changes");
         _activeTweens += 1;
         return TweenEnd;
@@ -128,11 +142,11 @@ public class UIController : MonoBehaviour {
     /// <exception cref="ArgumentOutOfRangeException"></exception>
     private void ChangeStance(UIStance stance) {
         // Quit early if UI is currently "locked" due to an active tween
-        if (_UILock || stance == _currentUI)
+        if (UILock || stance == _currentUI)
             return;
 
         Debug.Log($"UI Transition: {_currentUI} -> {stance}");
-        
+
         // Title -> Settings/About/Play
         if (_currentUI == UIStance.Title) {
             MoveElements(UIGroup.TitleScreen, true);
@@ -140,13 +154,13 @@ public class UIController : MonoBehaviour {
                 MoveElements(UIGroup.SettingsScreen, false);
             else if (stance == UIStance.About)
                 MoveElements(UIGroup.AboutScreen, false);
-            else if (stance == UIStance.Play)
+            else if (stance == UIStance.PlayAdjust)
                 MoveElements(UIGroup.AdjustmentsScreen, false);
         }
         // Settings/About/Play -> Title
         else if (stance == UIStance.Title) {
             MoveElements(UIGroup.TitleScreen, false);
-            if (_currentUI == UIStance.Play)
+            if (_currentUI == UIStance.PlayAdjust)
                 MoveElements(UIGroup.AdjustmentsScreen, true);
             else if (_currentUI == UIStance.Settings)
                 MoveElements(UIGroup.SettingsScreen, true);
