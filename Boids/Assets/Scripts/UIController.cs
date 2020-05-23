@@ -1,5 +1,6 @@
 ﻿using System;
 using TMPro;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -57,7 +58,7 @@ public class UIController : MonoBehaviour {
         // Add event functions
         startButton.onClick.AddListener(OnStartButton);
         aboutButton.onClick.AddListener(OnAboutButton);
-        aboutCloseButton.onClick.AddListener(OnAboutClose);
+        aboutCloseButton.onClick.AddListener(OnAboutCloseButton);
         settingsButton.onClick.AddListener(OnSettingsButton);
         settingsCloseButton.onClick.AddListener(OnSettingsCloseButton);
         
@@ -78,6 +79,27 @@ public class UIController : MonoBehaviour {
         _titleElements = new[] {titleText.gameObject, startButton.gameObject, settingsButton.gameObject};
     }
 
+    private void Update() {
+        // Exit to the title screen with Escape key
+        if (Input.GetKeyDown(KeyCode.Escape)) {
+            Debug.Log($"Escape key pressed");
+            switch (_currentUI) {
+                case UIStance.About:
+                    OnAboutCloseButton();
+                    break;
+                case UIStance.Play:
+                    OnPlayCloseButton();
+                    break;
+                case UIStance.Settings:
+                    OnSettingsCloseButton();
+                    break;
+                case UIStance.Title:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+    }
 
     // Move Title Elements In/Out
     private void MoveTitleElements(bool away) {
@@ -157,10 +179,20 @@ public class UIController : MonoBehaviour {
     }
 
     // Handle returning to the Title Screen, closing the About Screen
-    private void OnAboutClose() {
+    private void OnAboutCloseButton() {
         if (_currentUI == UIStance.About) {
             Debug.Log($"Screen Transition: {_currentUI} -> {UIStance.Title}");
             MoveAboutElements(true);
+            MoveTitleElements(false);
+            _currentUI = UIStance.Title;
+        }
+    }
+    
+    // Handle returning to the Title Screen, closing the Play Screen
+    private void OnPlayCloseButton() {
+        if (_currentUI == UIStance.Play) {
+            Debug.Log($"Screen Transition: {_currentUI} -> {UIStance.Title}");
+            MoveAdjustmentElements(true);
             MoveTitleElements(false);
             _currentUI = UIStance.Title;
         }
