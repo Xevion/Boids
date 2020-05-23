@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.UI;
@@ -33,10 +34,8 @@ public class UIController : MonoBehaviour {
     private Rect _canvasRect;
     private float _scaleFactor;
     private int _activeTweens;
-    private bool _UILock {
-        get => _activeTweens > 0;
-        set { }
-    }
+
+    private bool _UILock => _activeTweens > 0;
 
     // Element Displacements
     private Vector3 _aboutDiff;
@@ -92,81 +91,83 @@ public class UIController : MonoBehaviour {
     }
 
     private void Update() {
-        // Exit to the title screen with Escape key
+        // on Escape key, attempts to change UI stance to the Title Screen
         if (Input.GetKeyDown(KeyCode.Escape))
             ChangeStance(UIStance.Title);
     }
-    
-    
+
+    /// <summary>
+    /// Signals to the application that a Tween has ended.
+    /// This will unlock UI stance changes (if it was the last Tween within the stack).
+    /// </summary>
+    /// <seealso cref="StartTween"/>
     private void TweenEnd() {
         _activeTweens -= 1;
-        if(!_UILock)
+        if (!_UILock)
             Debug.Log("Unlocking Stance Changes");
     }
 
+    /// <summary>
+    /// Signals to the application that a Tween is in progress.
+    /// This locks UI stance changes until all Tweens have completed.
+    /// This method returns the <c>TweenEnd</c> callback, which must be used in conjunction with <c>StartTween</c>.
+    /// </summary>
+    /// <returns>returns the <see cref="TweenEnd"/> action for a deconstructing callback</returns>
+    /// <seealso cref="TweenEnd"/>
     private Action StartTween() {
-        if(!_UILock)
+        if (!_UILock)
             Debug.Log("Locking Stance Changes");
         _activeTweens += 1;
         return TweenEnd;
     }
 
 
+    /// <summary>
+    /// Switches the 'Stance' a UI is in by moving groups of elements around.
+    /// </summary>
+    /// <param name="stance">The stance that the UI should switch to next.</param>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
     private void ChangeStance(UIStance stance) {
         // Quit early if UI is currently "locked" due to an active tween
         if (_UILock || stance == _currentUI)
             return;
 
         Debug.Log($"UI Transition: {_currentUI} -> {stance}");
-
-        switch (_currentUI) {
-            // Title -> Settings/About/Play
-            case UIStance.Title:
-                if (stance == UIStance.Settings) {
-                    MoveElements(UIGroup.TitleScreen, true);
-                    MoveElements(UIGroup.SettingsScreen, false);
-                }
-                else if (stance == UIStance.About) {
-                    MoveElements(UIGroup.TitleScreen, true);
-                    MoveElements(UIGroup.AboutScreen, false);
-                }
-                else if (stance == UIStance.Play) {
-                    MoveElements(UIGroup.TitleScreen, true);
-                    MoveElements(UIGroup.AdjustmentsScreen, false);
-                }
-
-                break;
-            // Play -> Title
-            case UIStance.Play:
-                if (stance == UIStance.Title) {
-                    MoveElements(UIGroup.TitleScreen, false);
-                    MoveElements(UIGroup.AdjustmentsScreen, true);
-                }
-
-                break;
-            // Settings -> Title
-            case UIStance.Settings:
-                if (stance == UIStance.Title) {
-                    MoveElements(UIGroup.TitleScreen, false);
-                    MoveElements(UIGroup.SettingsScreen, true);
-                }
-
-                break;
-            // About -> Title
-            case UIStance.About:
-                if (stance == UIStance.Title) {
-                    MoveElements(UIGroup.TitleScreen, false);
-                    MoveElements(UIGroup.AboutScreen, true);
-                }
-
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
+        
+        // Title -> Settings/About/Play
+        if (_currentUI == UIStance.Title) {
+            MoveElements(UIGroup.TitleScreen, true);
+            if (stance == UIStance.Settings)
+                MoveElements(UIGroup.SettingsScreen, false);
+            else if (stance == UIStance.About)
+                MoveElements(UIGroup.AboutScreen, false);
+            else if (stance == UIStance.Play)
+                MoveElements(UIGroup.AdjustmentsScreen, false);
+        }
+        // Settings/About/Play -> Title
+        else if (stance == UIStance.Title) {
+            MoveElements(UIGroup.TitleScreen, false);
+            if (_currentUI == UIStance.Play)
+                MoveElements(UIGroup.AdjustmentsScreen, true);
+            else if (_currentUI == UIStance.Settings)
+                MoveElements(UIGroup.SettingsScreen, true);
+            else if (_currentUI == UIStance.About)
+                MoveElements(UIGroup.AboutScreen, true);
         }
 
         _currentUI = stance;
     }
 
+    /// <summary>
+    /// Moves groups of elements back and forth using the LeanTween framework.
+    /// <c>MoveElements</c> is not aware of the current position of the elements at any time,
+    /// thus measures must be implemented to track the current 'state' of any elements.
+    ///
+    /// Used in conjunction with <see cref="ChangeStance"/> to manipulate the UI elements.
+    /// </summary>
+    /// <param name="group">the <c>UIGroup</c> associated with the elements you wish to move</param>
+    /// <param name="away">moves elements away (<c></c>)</param>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
     private void MoveElements(UIGroup group, bool away) {
         switch (group) {
             case UIGroup.TitleScreen:
