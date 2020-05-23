@@ -5,10 +5,6 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class UIController : MonoBehaviour {
-    public Canvas canvas;
-
-    public BoidController boidController;
-
     // Main Title Screen Elements
     public Button startButton;
     public Button settingsButton;
@@ -21,19 +17,27 @@ public class UIController : MonoBehaviour {
 
     // Adjustment Panel Elements
     public RectTransform adjPanel;
+    public Button adjCloseButton;
 
     // Settings Panel Elements
     public RectTransform settingsPanel;
     public Button settingsCloseButton;
 
-    // Element Groups
+    // Element Groups (populated on Start)
     private GameObject[] _titleElements;
 
+    // Misc Elements/Cached Objects
+    public Canvas canvas;
+    public BoidController boidController;
     private UIStance _currentUI;
     private CanvasScaler _scaler;
     private Rect _canvasRect;
     private float _scaleFactor;
     private int _activeTweens;
+    
+    /// <summary>
+    /// returns <c>True</c> when the UI Stance is locked due to active tweening animations
+    /// </summary>
     private bool UILock => _activeTweens > 0;
 
     // Element Displacements
@@ -84,6 +88,7 @@ public class UIController : MonoBehaviour {
         aboutCloseButton.onClick.AddListener(() => ChangeStance(UIStance.Title));
         settingsButton.onClick.AddListener(() => ChangeStance(UIStance.Settings));
         settingsCloseButton.onClick.AddListener(() => ChangeStance(UIStance.Title));
+        adjCloseButton.onClick.AddListener(() => ChangeStance(UIStance.Title));
 
         // Calculate UI position deltas
         _aboutDiff = new Vector3(_canvasRect.size.x * _scaleFactor, 0, 0);
