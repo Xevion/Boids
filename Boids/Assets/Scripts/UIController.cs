@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Net;
-using JetBrains.Annotations;
-using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -78,6 +75,9 @@ public class UIController : MonoBehaviour {
     }
 
     private void Start() {
+        // Set Target Application Framerate
+        Application.targetFrameRate = 90;
+        
         // Basic variable setup
         _currentUI = UIStance.Title;
         _scaler = canvas.GetComponent<CanvasScaler>();
