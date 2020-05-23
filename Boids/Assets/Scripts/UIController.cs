@@ -92,9 +92,19 @@ public class UIController : MonoBehaviour {
             ChangeStance(UIStance.Title);
     }
 
+    private void UnlockStanceChange() {
+        Debug.Log("Unlocking stance changes");
+        _UILock = false;
+    }
+
+    private void LockStanceChange() {
+        Debug.Log("Locking stance changes");
+        _UILock = true;
+    }
+
     private void ChangeStance(UIStance stance) {
         // Quit early if UI is currently "locked" due to an active tween
-        if (_UILock)
+        if (_UILock || stance == _currentUI)
             return;
 
         Debug.Log($"UI Transition: {_currentUI} -> {stance}");
@@ -148,6 +158,9 @@ public class UIController : MonoBehaviour {
     }
 
     private void MoveElements(UIGroup group, bool away) {
+        // Disable changing of stances until all tweens are complete
+        LockStanceChange();
+        
         switch (group) {
             case UIGroup.TitleScreen:
                 // Main Title and Start/Settings Buttons
@@ -155,7 +168,8 @@ public class UIController : MonoBehaviour {
                     LeanTween
                         .move(element, element.transform.position + _titleDiff * (away ? 1 : -1), away ? 0.65f : 1.15f)
                         .setDelay(away ? 0f : 0.35f)
-                        .setEase(away ? LeanTweenType.easeInCubic : LeanTweenType.easeOutCubic);
+                        .setEase(away ? LeanTweenType.easeInCubic : LeanTweenType.easeOutCubic)
+                        .setOnComplete(UnlockStanceChange);
                 }
 
                 // Bottom Right About Button
@@ -170,21 +184,24 @@ public class UIController : MonoBehaviour {
                     .move((adjPanelGo = adjPanel.gameObject),
                         adjPanelGo.transform.position + _adjustmentsDiff * (away ? 1 : -1), 1.15f)
                     .setDelay(away ? 0f : 0.15f)
-                    .setEase(LeanTweenType.easeInOutCubic);
+                    .setEase(LeanTweenType.easeInOutCubic)
+                    .setOnComplete(UnlockStanceChange);
                 break;
             case UIGroup.AboutScreen:
                 LeanTween
                     .move(aboutPanel.gameObject, aboutPanel.transform.position + _aboutDiff * (away ? 1 : -1),
                         away ? 0.6f : 1f)
                     .setDelay(away ? 0f : 0.40f)
-                    .setEase(away ? LeanTweenType.easeInCubic : LeanTweenType.easeOutCubic);
+                    .setEase(away ? LeanTweenType.easeInCubic : LeanTweenType.easeOutCubic)
+                    .setOnComplete(UnlockStanceChange);
                 break;
             case UIGroup.SettingsScreen:
                 LeanTween
                     .move(settingsPanel.gameObject, settingsPanel.transform.position + _settingsDiff * (away ? 1 : -1),
                         away ? 0.7f : 1.1f)
                     .setDelay(away ? 0.05f : 0.15f)
-                    .setEase(away ? LeanTweenType.easeInCubic : LeanTweenType.easeOutCubic);
+                    .setEase(away ? LeanTweenType.easeInCubic : LeanTweenType.easeOutCubic)
+                    .setOnComplete(UnlockStanceChange);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(@group), @group, null);
