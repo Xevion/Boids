@@ -11,10 +11,11 @@ public class BoidController : MonoBehaviour {
     [NonSerialized] public Rect Boundary;
 
     // Swarm Attributes
-    public int boidCount = 50;
-    public float boidGroupRange = 1.0f;
-    public float boidStartVelocity = 0.005f;
-    [SerializeField] public float boidVelocityLimit = 1.0f;
+    [SerializeField] public int boidCount = 50;
+    [SerializeField] public float boidGroupRange = 1.0f;
+    [SerializeField] public float boidStartVelocity = 0.005f;
+    [SerializeField] public float minSpeed;
+    [SerializeField] public float maxSpeed;
 
     // Boid Rules are multiplied by this to allow rule 'tweaking'
     [SerializeField] public float globalBias = 1.0f;
@@ -35,6 +36,7 @@ public class BoidController : MonoBehaviour {
     [SerializeField] public bool edgeWrapping = true; // Enforce Edge Wrapping
     [SerializeField] public int circleVertexCount = 40; // The number of vertices for circles displayed
     [SerializeField] public float circleWidth = 0.1f; // Width of circle
+    [SerializeField] public float maxSteerForce = 1f;
 
 
     public Boid focusedBoid; // A focused Boid has special rendering
