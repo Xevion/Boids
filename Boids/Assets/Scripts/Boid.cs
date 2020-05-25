@@ -56,14 +56,15 @@ public class Boid : MonoBehaviour {
                 acceleration += SteerTowards(RuleBound()) * _parent.boundaryBias;
 
             // Limit the Velocity Vector to a certain Magnitude
-            _velocity += acceleration;
+            _velocity += acceleration * Time.deltaTime;
             float speed = _velocity.magnitude;
             Vector2 dir = _velocity / speed;
             speed = Mathf.Clamp(speed, _parent.minSpeed, _parent.maxSpeed);
             _velocity = dir * speed;
 
-            _position += _velocity;
+            _position += _velocity * Time.deltaTime;
             transform.position = new Vector3(_position.x, _position.y, 0);
+            // transform.forward = dir;
         }
 
         if (_parent.edgeWrapping)

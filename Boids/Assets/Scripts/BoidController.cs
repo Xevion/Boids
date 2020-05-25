@@ -36,7 +36,7 @@ public class BoidController : MonoBehaviour {
     [SerializeField] public bool edgeWrapping = true; // Enforce Edge Wrapping
     [SerializeField] public int circleVertexCount = 40; // The number of vertices for circles displayed
     [SerializeField] public float circleWidth = 0.1f; // Width of circle
-    [SerializeField] public float maxSteerForce = 1f;
+    [SerializeField] public float maxSteerForce = 10f;
 
 
     public Boid focusedBoid; // A focused Boid has special rendering
