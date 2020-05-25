@@ -77,7 +77,7 @@ public class UIController : MonoBehaviour {
     private void Start() {
         // Set Target Application Framerate
         Application.targetFrameRate = 90;
-        
+
         // Basic variable setup
         _currentUI = UIStance.Title;
         _scaler = canvas.GetComponent<CanvasScaler>();
@@ -116,7 +116,15 @@ public class UIController : MonoBehaviour {
     private void Update() {
         // on Escape key, attempts to change UI stance to the Title Screen
         if (Input.GetKeyDown(KeyCode.Escape))
-            ChangeStance(UIStance.Title);
+            if (_currentUI == UIStance.PlayHidden)
+                ChangeStance(UIStance.PlayAdjust);
+            else
+                ChangeStance(UIStance.Title);
+        else if (Input.GetKeyDown(KeyCode.LeftAlt))
+            if (_currentUI == UIStance.PlayAdjust)
+                ChangeStance(UIStance.PlayHidden);
+            else if (_currentUI == UIStance.PlayHidden)
+                ChangeStance(UIStance.PlayAdjust);
     }
 
     /// <summary>
@@ -170,18 +178,26 @@ public class UIController : MonoBehaviour {
                     ShowBoidsTitle(true);
             }
         }
-        // Settings/About/Play -> Title
+        // Settings/About/PlayAdjust -> Title
         else if (stance == UIStance.Title) {
             MoveElements(UIGroup.TitleScreen, false);
             if (_currentUI == UIStance.PlayAdjust) {
                 MoveElements(UIGroup.AdjustmentsScreen, true);
-                if(!showBoidsOnTitleToggle.isOn)
+                if (!showBoidsOnTitleToggle.isOn)
                     ShowBoidsTitle(false);
             }
             else if (_currentUI == UIStance.Settings)
                 MoveElements(UIGroup.SettingsScreen, true);
             else if (_currentUI == UIStance.About)
                 MoveElements(UIGroup.AboutScreen, true);
+        }
+        // PlayAdjust -> PlayHidden
+        else if (stance == UIStance.PlayHidden && _currentUI == UIStance.PlayAdjust) {
+            MoveElements(UIGroup.AdjustmentsScreen, true);
+        }
+        // PlayHidden -> PlayAdjust
+        else if (stance == UIStance.PlayAdjust && _currentUI == UIStance.PlayHidden) {
+            MoveElements(UIGroup.AdjustmentsScreen, false);
         }
 
         _currentUI = stance;
@@ -245,7 +261,7 @@ public class UIController : MonoBehaviour {
 
     private void ShowBoidsTitle(bool active) {
         ShowBoids(active);
-        
+
         // Works somewhat close to what is needed, but needs a fix.
         // if (!active) {
         //     print("Fading out");
@@ -262,7 +278,7 @@ public class UIController : MonoBehaviour {
     }
 
     private void ShowBoids(bool show) {
-        foreach(MeshRenderer meshRenderer in boidController.gameObject.GetComponentsInChildren<MeshRenderer>())
+        foreach (MeshRenderer meshRenderer in boidController.gameObject.GetComponentsInChildren<MeshRenderer>())
             meshRenderer.enabled = show;
     }
 }
