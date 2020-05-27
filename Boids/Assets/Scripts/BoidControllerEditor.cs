@@ -25,8 +25,8 @@ public class BoidControllerEditor : Editor {
         controller.minSpeed = EditorGUILayout.Slider("Minimum Speed", controller.minSpeed, 0.01f, 25.0f);
         controller.maxSpeed = EditorGUILayout.Slider("Maximum Speed", controller.maxSpeed, 0.01f, 25.0f);
         controller.boidSeparationRange = EditorGUILayout.Slider("Separation Range", controller.boidSeparationRange, 0.01f, 5.0f);
-        controller.boundaryForce = EditorGUILayout.Slider("Boundary Force", controller.boundaryForce, 0.25f, 1f);
-        controller.maxSteerForce = EditorGUILayout.Slider("Max Steer Force", controller.maxSteerForce, 1f, 100f);
+        controller.boundaryForce = EditorGUILayout.Slider("Boundary Force", controller.boundaryForce, 0.25f, 50f);
+        controller.maxSteerForce = EditorGUILayout.Slider("Max Steer Force", controller.maxSteerForce, 1f, 200f);
         
         // Boid Bias Attributes
         controller.alignmentBias = EditorGUILayout.Slider("Alignment Bias", controller.alignmentBias, 0.001f, 1.5f);
