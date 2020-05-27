@@ -169,7 +169,23 @@ public class Boid : MonoBehaviour {
 
     // Returns a list of boids within a certain radius of the Boid, representing it's local 'flock'
     private List<Boid> GetFlock(List<Boid> boids, float radius) {
-        return boids.Where(boid => boid != this && Vector2.Distance(this._position, boid._position) <= radius).ToList();
+        List<Boid> flock = new List<Boid>();
+        
+        foreach (Boid boid in boids) {
+            if (boid == this || Vector2.Distance(this._position, boid._position) > radius)
+                continue;
+
+            if (_parent.enableFOVChecks) {
+                float angle1 = Mathf.Rad2Deg * -Mathf.Atan2(_velocity.x, _velocity.y);
+                float angle2 = Mathf.Rad2Deg * -Mathf.Atan2(boid._velocity.x, boid._velocity.y);
+                if (Mathf.Abs(angle2 - angle1) > _parent.boidFOV / 2)
+                    continue;
+            }
+
+            flock.Add(boid);
+        }
+
+        return flock;
     }
 
     // Sets up a Boid to be 'Focused', adds Circles around object and changes color

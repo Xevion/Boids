@@ -29,6 +29,7 @@ public class BoidController : MonoBehaviour {
     [SerializeField] public bool enableAlignment = true;
     [SerializeField] public bool enableCohesion = true;
     [SerializeField] public bool enableBoundary = true;
+    [SerializeField] public bool enableFOVChecks = true;
 
     [SerializeField] public float boidSeparationRange = 2.3f; // Boid Separation rule's activation distance
     [SerializeField] public float boundaryForce = 10f; // The force applied when a Boid hits the boundary
@@ -37,6 +38,7 @@ public class BoidController : MonoBehaviour {
     [SerializeField] public int circleVertexCount = 40; // The number of vertices for circles displayed
     [SerializeField] public float circleWidth = 0.1f; // Width of circle
     [SerializeField] public float maxSteerForce = 10f;
+    [SerializeField] public float boidFOV = 160;
 
 
     public Boid focusedBoid; // A focused Boid has special rendering

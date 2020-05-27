@@ -26,12 +26,13 @@ public class BoidControllerEditor : Editor {
         controller.maxSpeed = EditorGUILayout.Slider("Maximum Speed", controller.maxSpeed, 0.01f, 25.0f);
         controller.boidSeparationRange = EditorGUILayout.Slider("Separation Range", controller.boidSeparationRange, 0.01f, 5.0f);
         controller.boundaryForce = EditorGUILayout.Slider("Boundary Force", controller.boundaryForce, 0.25f, 50f);
-        controller.maxSteerForce = EditorGUILayout.Slider("Max Steer Force", controller.maxSteerForce, 1f, 200f);
-        
+        controller.maxSteerForce = EditorGUILayout.Slider("Max Steer Force", controller.maxSteerForce, 1f, 500f);
+        controller.boidFOV = EditorGUILayout.Slider("Boid FOV", controller.boidFOV, 1f, 360f);
+
         // Boid Bias Attributes
         controller.alignmentBias = EditorGUILayout.Slider("Alignment Bias", controller.alignmentBias, 0.001f, 1.5f);
         controller.cohesionBias = EditorGUILayout.Slider("Cohesion Bias", controller.cohesionBias, 0.001f, 1.5f);
-        controller.separationBias = EditorGUILayout.Slider("Separation Bias", controller.separationBias, 0.001f, 1.5f);
+        controller.separationBias = EditorGUILayout.Slider("Separation Bias", controller.separationBias, 0.001f, 2.5f);
         controller.boundaryBias = EditorGUILayout.Slider("Boundary Bias", controller.boundaryBias, 0.01f, 1.5f);
 
         controller.localFlocks = EditorGUILayout.Toggle("Use Groups?", controller.localFlocks);
@@ -41,6 +42,7 @@ public class BoidControllerEditor : Editor {
         controller.enableCohesion = EditorGUILayout.Toggle("Enable Cohesion?", controller.enableCohesion);
         controller.enableSeparation = EditorGUILayout.Toggle("Enable Separation?", controller.enableSeparation);
         controller.enableBoundary = EditorGUILayout.Toggle("Enable Boundary?", controller.enableBoundary);
+        controller.enableFOVChecks = EditorGUILayout.Toggle("Enable FOV?", controller.enableFOVChecks);
 
         // Boid Rendering
         controller.circleVertexCount = EditorGUILayout.IntSlider("Circle Vertex Count", controller.circleVertexCount, 4, 360);
