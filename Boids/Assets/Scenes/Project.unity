@@ -1252,25 +1252,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7d72224fef7a4fb4a998b0980fe0eb77, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  boidCount: 153
-  boidGroupRange: 2.69
-  boidStartVelocity: 0.05
-  boidVelocityLimit: 0.3
+  boidCount: 372
+  boidGroupRange: 3.03
+  boidStartVelocity: 14.8
+  minSpeed: 12
+  maxSpeed: 12
   globalBias: 1
-  separationBias: 0.014
-  alignmentBias: 0.194
-  cohesionBias: 0.05
-  boundaryBias: 0.063
+  separationBias: 1.5
+  alignmentBias: 0.517
+  cohesionBias: 0.451
+  boundaryBias: 1.492
   enableSeparation: 1
   enableAlignment: 1
   enableCohesion: 1
   enableBoundary: 1
-  boidSeparationRange: 5
-  boundaryForce: 0.352
+  boidSeparationRange: 2.3
+  boundaryForce: 7.6
   localFlocks: 1
   edgeWrapping: 1
   circleVertexCount: 360
   circleWidth: 0.1
+  maxSteerForce: 138
   focusedBoid: {fileID: 0}
   boidObject: {fileID: 1737515784064720040, guid: 23e1eaaf69d4ef342ac3ef9590f6c642,
     type: 3}
@@ -3522,7 +3524,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -22.099976, y: -23.8}
+  m_AnchoredPosition: {x: -22.099976, y: -23.800049}
   m_SizeDelta: {x: 25, y: 25}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &945635207
@@ -4121,7 +4123,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1165952970}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.3479285, y: -7.3538084, z: -1779.8757}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}

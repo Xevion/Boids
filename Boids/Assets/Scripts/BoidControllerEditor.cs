@@ -21,16 +21,18 @@ public class BoidControllerEditor : Editor {
 
         // Basic Boid Controller Attributes
         controller.boidGroupRange = EditorGUILayout.Slider("Group Range", controller.boidGroupRange, 0.01f, 7.5f);
-        controller.boidStartVelocity = EditorGUILayout.Slider("Start Velocity", controller.boidStartVelocity, 0.01f, 5.0f);
-        controller.boidVelocityLimit = EditorGUILayout.Slider("Max Velocity", controller.boidVelocityLimit, 0.01f, 5.0f);
+        controller.boidStartVelocity = EditorGUILayout.Slider("Start Velocity", controller.boidStartVelocity, 0.01f, 25.0f);
+        controller.minSpeed = EditorGUILayout.Slider("Minimum Speed", controller.minSpeed, 0.01f, 25.0f);
+        controller.maxSpeed = EditorGUILayout.Slider("Maximum Speed", controller.maxSpeed, 0.01f, 25.0f);
         controller.boidSeparationRange = EditorGUILayout.Slider("Separation Range", controller.boidSeparationRange, 0.01f, 5.0f);
-        controller.boundaryForce = EditorGUILayout.Slider("Boundary Force", controller.boundaryForce, 0.25f, 1f);
+        controller.boundaryForce = EditorGUILayout.Slider("Boundary Force", controller.boundaryForce, 0.25f, 50f);
+        controller.maxSteerForce = EditorGUILayout.Slider("Max Steer Force", controller.maxSteerForce, 1f, 200f);
         
         // Boid Bias Attributes
-        controller.alignmentBias = EditorGUILayout.Slider("Alignment Bias", controller.alignmentBias, 0.001f, 0.5f);
-        controller.cohesionBias = EditorGUILayout.Slider("Cohesion Bias", controller.cohesionBias, 0.001f, 0.5f);
-        controller.separationBias = EditorGUILayout.Slider("Separation Bias", controller.separationBias, 0.001f, 0.5f);
-        controller.boundaryBias = EditorGUILayout.Slider("Boundary Bias", controller.boundaryBias, 0.01f, 0.5f);
+        controller.alignmentBias = EditorGUILayout.Slider("Alignment Bias", controller.alignmentBias, 0.001f, 1.5f);
+        controller.cohesionBias = EditorGUILayout.Slider("Cohesion Bias", controller.cohesionBias, 0.001f, 1.5f);
+        controller.separationBias = EditorGUILayout.Slider("Separation Bias", controller.separationBias, 0.001f, 1.5f);
+        controller.boundaryBias = EditorGUILayout.Slider("Boundary Bias", controller.boundaryBias, 0.01f, 1.5f);
 
         controller.localFlocks = EditorGUILayout.Toggle("Use Groups?", controller.localFlocks);
         controller.edgeWrapping = EditorGUILayout.Toggle("Enforce Wrapping?", controller.edgeWrapping);

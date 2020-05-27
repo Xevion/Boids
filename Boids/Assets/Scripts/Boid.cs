@@ -34,35 +34,46 @@ public class Boid : MonoBehaviour {
         // Skip Flock Calculations if wrapping in progress
         if (_isWrappingX || _isWrappingY) {
             UpdateCenteringVelocity();
-            _position += _centeringVelocity;
+            _position += _centeringVelocity * Time.deltaTime;
             transform.position = _position;
         }
         else {
+            Vector2 acceleration = Vector2.zero;
             List<Boid> flock = _parent.localFlocks ? GetFlock(_parent.boids, _parent.boidGroupRange) : _parent.boids;
             _latestNeighborhoodCount = flock.Count;
 
             // Calculate all offsets and multiple by magnitudes given
             if (flock.Count > 0) {
                 if (_parent.enableCohesion)
-                    _velocity += Rule1(flock) * _parent.cohesionBias;
+                    acceleration += SteerTowards(Rule1(flock)) * _parent.cohesionBias;
                 if (_parent.enableSeparation)
-                    _velocity += Rule2(flock) * _parent.separationBias;
+                    acceleration += SteerTowards(Rule2(flock)) * _parent.separationBias;
                 if (_parent.enableAlignment)
-                    _velocity += Rule3(flock) * _parent.alignmentBias;
+                    acceleration += SteerTowards(Rule3(flock)) * _parent.alignmentBias;
             }
 
             if (_parent.enableBoundary && _parent.Boundary.Contains(_position))
-                _velocity += RuleBound() * _parent.boundaryBias;
+                acceleration += SteerTowards(RuleBound()) * _parent.boundaryBias;
 
             // Limit the Velocity Vector to a certain Magnitude
-            _velocity = Util.MaxVelocity(_velocity, _parent.boidVelocityLimit);
+            _velocity += acceleration * Time.deltaTime;
+            float speed = _velocity.magnitude;
+            Vector2 dir = _velocity / speed;
+            speed = Mathf.Clamp(speed, _parent.minSpeed, _parent.maxSpeed);
+            _velocity = dir * speed;
 
-            _position += _velocity;
-            transform.position = new Vector3(_position.x, _position.y, 0);
+            _position += _velocity * Time.deltaTime;
+            transform.position = _position;
+            // transform.forward = dir;
         }
 
         if (_parent.edgeWrapping)
             Wrapping();
+    }
+
+    private Vector2 SteerTowards(Vector2 vector) {
+        Vector2 v = vector.normalized * _parent.maxSpeed - _velocity;
+        return Vector2.ClampMagnitude(v, _parent.maxSteerForce);
     }
 
     private void Wrapping() {
@@ -95,9 +106,9 @@ public class Boid : MonoBehaviour {
 
     // When Wrapping, this Velocity directs the Boid to the center of the Rectangle
     private void UpdateCenteringVelocity() {
-        _centeringVelocity = Util.RotateBy(new Vector2(_parent.boidVelocityLimit, _parent.boidVelocityLimit),
+        _centeringVelocity = Util.RotateBy(new Vector2(_parent.maxSpeed, _parent.maxSpeed),
             Vector2.Angle(_position, _parent.Space.center));
-        _centeringVelocity = Util.MaxVelocity(_parent.Space.center - _position, _parent.boidVelocityLimit / 2.0f);
+        _centeringVelocity = Util.MaxVelocity(_parent.Space.center - _position, _parent.maxSpeed / 2.0f);
     }
 
     // Cohesion: Steer towards center of mass of flock
