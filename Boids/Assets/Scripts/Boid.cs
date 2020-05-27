@@ -34,7 +34,7 @@ public class Boid : MonoBehaviour {
         // Skip Flock Calculations if wrapping in progress
         if (_isWrappingX || _isWrappingY) {
             UpdateCenteringVelocity();
-            _position += _centeringVelocity;
+            _position += _centeringVelocity * Time.deltaTime;
             transform.position = _position;
         }
         else {
@@ -63,7 +63,7 @@ public class Boid : MonoBehaviour {
             _velocity = dir * speed;
 
             _position += _velocity * Time.deltaTime;
-            transform.position = new Vector3(_position.x, _position.y, 0);
+            transform.position = _position;
             // transform.forward = dir;
         }
 
