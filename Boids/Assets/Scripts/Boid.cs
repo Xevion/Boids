@@ -220,9 +220,7 @@ public class Boid : MonoBehaviour {
         var triangle = transform.GetComponent<Triangle>();
         triangle.meshRenderer.material.color = Color.red;
 
-        // Add a LineRenderer for Radius Drawing
-        DrawCircle(_parent.boidSeparationRange, "Separation Range Circle");
-        DrawCircle(_parent.boidGroupRange, "Group Range Circle");
+        Draw();
     }
 
     // Disable focusing, removing LineRenderers and resetting color
@@ -238,14 +236,26 @@ public class Boid : MonoBehaviour {
             Destroy(child.gameObject);
     }
 
+    private void Draw(bool redraw = false) {
+        if (redraw)
+            foreach (Transform child in transform)
+                Destroy(child.gameObject);
+
+        // Add a LineRenderer for Radius Drawing
+        DrawCircle(_parent.boidSeparationRange, "Separation Range Circle");
+        DrawCircle(_parent.boidGroupRange, "Group Range Circle");
+
+        // Draw FOV Line
+        DrawArcCentered((_parent.boidSeparationRange + _parent.boidGroupRange) / 2f, transform.eulerAngles.z,
+            _parent.boidFOV, "FOV Arc");
+    }
+
     private void DrawCircle(float radius, string childName) {
         // Create a new child GameObject to hold the LineRenderer Component
         var child = new GameObject(childName);
         child.transform.SetParent(transform);
         child.transform.position = transform.position;
         var line = child.AddComponent<LineRenderer>();
-
-        _parent.circleVertexCount = 360;
 
         // Setup LineRenderer properties
         line.useWorldSpace = false;
@@ -258,6 +268,38 @@ public class Boid : MonoBehaviour {
         var points = new Vector3[pointCount];
         for (int i = 0; i < pointCount; i++) {
             var rad = Mathf.Deg2Rad * (i * 360f / _parent.circleVertexCount);
+            points[i] = new Vector3(Mathf.Sin(rad) * radius, Mathf.Cos(rad) * radius, 0);
+        }
+
+        // Add points to LineRenderer
+        line.SetPositions(points);
+    }
+
+    private void DrawArcCentered(float radius, float centerAngle, float angleWidth, string childName) {
+        DrawArc(radius, centerAngle - angleWidth / 2f, centerAngle + angleWidth / 2f, childName);
+    }
+
+    private void DrawArc(float radius, float from, float to, string childName) {
+        // Create a new child GameObject to hold the LineRenderer Component
+        var child = new GameObject(childName);
+        child.transform.SetParent(transform);
+        child.transform.position = transform.position;
+        var line = child.AddComponent<LineRenderer>();
+
+        int vertexCount = _parent.arcVertexCount != -1 ? _parent.arcVertexCount : (int) Mathf.Abs(from - to) * 2;
+
+        // Setup LineRenderer properties
+        line.useWorldSpace = false;
+        line.startWidth = _parent.circleWidth;
+        line.endWidth = _parent.circleWidth;
+        line.positionCount = vertexCount + 1;
+
+        // Calculate points for circle
+        var pointCount = vertexCount + 1;
+        var points = new Vector3[pointCount];
+        for (int i = 0; i < pointCount; i++) {
+            var rad = Mathf.Deg2Rad * Mathf.LerpAngle(from, to, i / (float) pointCount);
+            // var rad = Mathf.Deg2Rad * (i * 360f / _parent.circleVertexCount);
             points[i] = new Vector3(Mathf.Sin(rad) * radius, Mathf.Cos(rad) * radius, 0);
         }
 
