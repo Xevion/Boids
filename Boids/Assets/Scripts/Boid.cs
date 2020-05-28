@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
+using UnityEditor;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 // Boids are represented by a moving, rotating triangle.
 // Boids should communicate with sibling Boids
@@ -29,7 +27,7 @@ public class Boid : MonoBehaviour {
 
     private void Update() {
         // Updates the rotation of the object based on the Velocity
-        transform.rotation = Quaternion.Euler(0, 0, Mathf.Rad2Deg * -Mathf.Atan2(_velocity.x, _velocity.y));
+        transform.eulerAngles = new Vector3(0, 0, Mathf.Rad2Deg * -Mathf.Atan2(_velocity.x, _velocity.y));
 
         // Skip Flock Calculations if wrapping in progress
         if (_isWrappingX || _isWrappingY) {
@@ -69,6 +67,27 @@ public class Boid : MonoBehaviour {
 
         if (_parent.edgeWrapping)
             Wrapping();
+    }
+
+    private void OnDrawGizmos() {
+        // Show # of Boids in Neighborhood
+        Handles.Label(transform.position, $"{_latestNeighborhoodCount}");
+
+        // Draw a Wire Arc visualizing FOV
+        if (isFocused) {
+            float angle = transform.eulerAngles.z + (_parent.boidFOV / 2f);
+            Vector3 from = Quaternion.AngleAxis(angle, Vector3.up) * Vector3.forward;
+            Handles.DrawWireArc(transform.position, transform.forward, from, _parent.boidFOV,
+                (_parent.boidGroupRange + _parent.boidSeparationRange) / 2f);
+        }
+    }
+
+    public Vector3 DirectionFromAngle(float _angleInDeg, bool _global) {
+        if (_global == false) {
+            _angleInDeg += transform.eulerAngles.z;
+        }
+
+        return new Vector3(Mathf.Sin(_angleInDeg * Mathf.Deg2Rad), Mathf.Cos(_angleInDeg * Mathf.Deg2Rad), 0);
     }
 
     private Vector2 SteerTowards(Vector2 vector) {
@@ -170,7 +189,7 @@ public class Boid : MonoBehaviour {
     // Returns a list of boids within a certain radius of the Boid, representing it's local 'flock'
     private List<Boid> GetFlock(List<Boid> boids, float radius) {
         List<Boid> flock = new List<Boid>();
-        
+
         foreach (Boid boid in boids) {
             if (boid == this || Vector2.Distance(this._position, boid._position) > radius)
                 continue;

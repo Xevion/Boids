@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
-using Debug = System.Diagnostics.Debug;
 using Random = UnityEngine.Random;
 
 public class BoidController : MonoBehaviour {
