@@ -20,16 +20,20 @@ public class BoidControllerEditor : Editor {
         }
 
         // Basic Boid Controller Attributes
-        controller.boidGroupRange = EditorGUILayout.Slider("Group Range", controller.boidGroupRange, 0.01f, 7.5f);
         controller.boidStartVelocity = EditorGUILayout.Slider("Start Velocity", controller.boidStartVelocity, 0.01f, 25.0f);
         EditorGUILayout.MinMaxSlider("Speed Limit",  ref controller.minSpeed, ref controller.maxSpeed, 0.01f, 25f);
         // controller.minSpeed = EditorGUILayout.Slider("Minimum Speed", controller.minSpeed, 0.01f, 25.0f);
         // controller.maxSpeed = EditorGUILayout.Slider("Maximum Speed", controller.maxSpeed, 0.01f, 25.0f);
-        controller.boidSeparationRange = EditorGUILayout.Slider("Separation Range", controller.boidSeparationRange, 0.01f, 5.0f);
         controller.boundaryForce = EditorGUILayout.Slider("Boundary Force", controller.boundaryForce, 0.25f, 50f);
         controller.maxSteerForce = EditorGUILayout.Slider("Max Steer Force", controller.maxSteerForce, 1f, 500f);
+        
+        EditorGUI.BeginChangeCheck();
+        controller.boidGroupRange = EditorGUILayout.Slider("Group Range", controller.boidGroupRange, 0.01f, 7.5f);
+        controller.boidSeparationRange = EditorGUILayout.Slider("Separation Range", controller.boidSeparationRange, 0.01f, 5.0f);
         controller.boidFOV = EditorGUILayout.Slider("Boid FOV", controller.boidFOV, 1f, 360f);
-
+        if (EditorGUI.EndChangeCheck())
+            controller.focusedBoid.Draw(true);
+        
         // Boid Bias Attributes
         controller.alignmentBias = EditorGUILayout.Slider("Alignment Bias", controller.alignmentBias, 0.001f, 1.5f);
         controller.cohesionBias = EditorGUILayout.Slider("Cohesion Bias", controller.cohesionBias, 0.001f, 1.5f);

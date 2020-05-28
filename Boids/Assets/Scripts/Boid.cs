@@ -29,7 +29,10 @@ public class Boid : MonoBehaviour {
         // Updates the rotation of the object based on the Velocity
         transform.eulerAngles = new Vector3(0, 0, Mathf.Rad2Deg * -Mathf.Atan2(_velocity.x, _velocity.y));
 
-        // Skip Flock Calculations if wrapping in progress
+        if(isFocused)
+            Draw(true);
+
+            // Skip Flock Calculations if wrapping in progress
         if (_isWrappingX || _isWrappingY) {
             UpdateCenteringVelocity();
             _position += _centeringVelocity * Time.deltaTime;
@@ -72,14 +75,6 @@ public class Boid : MonoBehaviour {
     private void OnDrawGizmos() {
         // Show # of Boids in Neighborhood
         Handles.Label(transform.position, $"{_latestNeighborhoodCount}");
-
-        // Draw a Wire Arc visualizing FOV
-        if (isFocused) {
-            float angle = transform.eulerAngles.z + (_parent.boidFOV / 2f);
-            Vector3 from = Quaternion.AngleAxis(angle, Vector3.up) * Vector3.forward;
-            Handles.DrawWireArc(transform.position, transform.forward, from, _parent.boidFOV,
-                (_parent.boidGroupRange + _parent.boidSeparationRange) / 2f);
-        }
     }
 
     public Vector3 DirectionFromAngle(float _angleInDeg, bool _global) {
@@ -236,7 +231,7 @@ public class Boid : MonoBehaviour {
             Destroy(child.gameObject);
     }
 
-    private void Draw(bool redraw = false) {
+    public void Draw(bool redraw = false) {
         if (redraw)
             foreach (Transform child in transform)
                 Destroy(child.gameObject);
@@ -292,16 +287,19 @@ public class Boid : MonoBehaviour {
         line.useWorldSpace = false;
         line.startWidth = _parent.circleWidth;
         line.endWidth = _parent.circleWidth;
-        line.positionCount = vertexCount + 1;
+        line.positionCount = vertexCount + 1 + 2;
 
         // Calculate points for circle
         var pointCount = vertexCount + 1;
-        var points = new Vector3[pointCount];
+        var points = new Vector3[pointCount + 2];
         for (int i = 0; i < pointCount; i++) {
-            var rad = Mathf.Deg2Rad * Mathf.LerpAngle(from, to, i / (float) pointCount);
+            var rad = Mathf.Deg2Rad * (180 - Mathf.LerpAngle(from, to, i / (float) pointCount));
             // var rad = Mathf.Deg2Rad * (i * 360f / _parent.circleVertexCount);
-            points[i] = new Vector3(Mathf.Sin(rad) * radius, Mathf.Cos(rad) * radius, 0);
+            points[i + 1] = new Vector3(Mathf.Sin(rad) * radius, Mathf.Cos(rad) * radius, 0);
         }
+
+        points[0] = new Vector3(0, 0, 0);
+        points[points.Length - 1] = points[0];
 
         // Add points to LineRenderer
         line.SetPositions(points);
