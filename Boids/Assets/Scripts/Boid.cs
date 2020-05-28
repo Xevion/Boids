@@ -10,16 +10,14 @@ public class Boid : MonoBehaviour {
     [NonSerialized] private Vector2 _velocity;
     [NonSerialized] private bool _isWrappingX = false;
     [NonSerialized] private bool _isWrappingY = false;
-    [NonSerialized] private Renderer[] _renderers;
     [NonSerialized] private Vector2 _centeringVelocity;
     [NonSerialized] private int _latestNeighborhoodCount = 0;
     [NonSerialized] private BoidController _parent;
-    [NonSerialized] public bool isFocused = false;
+    [NonSerialized] private bool _isFocused = false;
 
     private void Start() {
         _parent = transform.parent
             .GetComponent<BoidController>(); // Parent used to perform physics math without caching
-        _renderers = transform.GetComponents<Renderer>(); // Acquire Renderer(s) to check for Boid visibility
         _velocity = Util.GetRandomVelocity(_parent.boidStartVelocity); // Acquire a Velocity Vector with a magnitude
         _position = transform.position; // Track 2D position separately
         transform.name = $"Boid {transform.GetSiblingIndex()}"; // Name the Game Object so Boids can be tracked somewhat
@@ -75,14 +73,6 @@ public class Boid : MonoBehaviour {
         Handles.Label(transform.position, $"{_latestNeighborhoodCount}");
     }
 #endif
-
-    public Vector3 DirectionFromAngle(float _angleInDeg, bool _global) {
-        if (_global == false) {
-            _angleInDeg += transform.eulerAngles.z;
-        }
-
-        return new Vector3(Mathf.Sin(_angleInDeg * Mathf.Deg2Rad), Mathf.Cos(_angleInDeg * Mathf.Deg2Rad), 0);
-    }
 
     private Vector2 SteerTowards(Vector2 vector) {
         Vector2 v = vector.normalized * _parent.maxSpeed - _velocity;
@@ -185,9 +175,11 @@ public class Boid : MonoBehaviour {
         List<Boid> flock = new List<Boid>();
 
         foreach (Boid boid in boids) {
+            // Distance Check
             if (boid == this || Vector2.Distance(this._position, boid._position) > radius)
                 continue;
 
+            // FOV Check
             if (_parent.enableFOVChecks) {
                 float angle1 = Mathf.Rad2Deg * -Mathf.Atan2(_velocity.x, _velocity.y);
                 float angle2 = Mathf.Rad2Deg * -Mathf.Atan2(boid._velocity.x, boid._velocity.y);
@@ -203,23 +195,23 @@ public class Boid : MonoBehaviour {
 
     // Sets up a Boid to be 'Focused', adds Circles around object and changes color
     public void EnableFocusing() {
-        if (isFocused) {
+        if (_isFocused) {
             Debug.LogWarning("enableFocusing called on previously focused Boid");
             return;
         }
 
-        isFocused = true;
+        _isFocused = true;
 
         // Update Mesh Material Color
         var triangle = transform.GetComponent<Triangle>();
         triangle.meshRenderer.material.color = Color.red;
 
-        Draw();
+        Draw(false);
     }
 
     // Disable focusing, removing LineRenderers and resetting color
     public void DisableFocusing() {
-        isFocused = false;
+        _isFocused = false;
 
         // Update Mesh Material Color
         var oldTriangle = transform.GetComponent<Triangle>();
@@ -230,7 +222,7 @@ public class Boid : MonoBehaviour {
             Destroy(child.gameObject);
     }
 
-    public void Draw(bool redraw = false) {
+    public void Draw(bool redraw) {
         if (redraw)
             foreach (Transform child in transform)
                 Destroy(child.gameObject);
