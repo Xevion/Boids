@@ -29,10 +29,7 @@ public class Boid : MonoBehaviour {
         // Updates the rotation of the object based on the Velocity
         transform.eulerAngles = new Vector3(0, 0, Mathf.Rad2Deg * -Mathf.Atan2(_velocity.x, _velocity.y));
 
-        if(isFocused)
-            Draw(true);
-
-            // Skip Flock Calculations if wrapping in progress
+        // Skip Flock Calculations if wrapping in progress
         if (_isWrappingX || _isWrappingY) {
             UpdateCenteringVelocity();
             _position += _centeringVelocity * Time.deltaTime;
@@ -72,10 +69,12 @@ public class Boid : MonoBehaviour {
             Wrapping();
     }
 
+#if UNITY_EDITOR
     private void OnDrawGizmos() {
         // Show # of Boids in Neighborhood
         Handles.Label(transform.position, $"{_latestNeighborhoodCount}");
     }
+#endif
 
     public Vector3 DirectionFromAngle(float _angleInDeg, bool _global) {
         if (_global == false) {
@@ -293,8 +292,8 @@ public class Boid : MonoBehaviour {
         var pointCount = vertexCount + 1;
         var points = new Vector3[pointCount + 2];
         for (int i = 0; i < pointCount; i++) {
+            // Magic '180 - angle'
             var rad = Mathf.Deg2Rad * (180 - Mathf.LerpAngle(from, to, i / (float) pointCount));
-            // var rad = Mathf.Deg2Rad * (i * 360f / _parent.circleVertexCount);
             points[i + 1] = new Vector3(Mathf.Sin(rad) * radius, Mathf.Cos(rad) * radius, 0);
         }
 

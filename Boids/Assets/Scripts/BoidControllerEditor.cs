@@ -6,7 +6,8 @@ using UnityEngine;
 public class BoidControllerEditor : Editor {
     public override void OnInspectorGUI() {
         var controller = (BoidController) target;
-        
+        bool redraw = false;
+
         // Boid Count update
         EditorGUI.BeginChangeCheck();
         controller.boidCount = EditorGUILayout.IntSlider("Boid Count", controller.boidCount, 1, 500);
@@ -31,18 +32,16 @@ public class BoidControllerEditor : Editor {
         controller.boidGroupRange = EditorGUILayout.Slider("Group Range", controller.boidGroupRange, 0.01f, 7.5f);
         controller.boidSeparationRange = EditorGUILayout.Slider("Separation Range", controller.boidSeparationRange, 0.01f, 5.0f);
         controller.boidFOV = EditorGUILayout.Slider("Boid FOV", controller.boidFOV, 1f, 360f);
-        if (EditorGUI.EndChangeCheck())
-            controller.focusedBoid.Draw(true);
+        redraw = redraw || EditorGUI.EndChangeCheck();
         
-        // Boid Bias Attributes
+            // Boid Bias Attributes
         controller.alignmentBias = EditorGUILayout.Slider("Alignment Bias", controller.alignmentBias, 0.001f, 1.5f);
         controller.cohesionBias = EditorGUILayout.Slider("Cohesion Bias", controller.cohesionBias, 0.001f, 1.5f);
         controller.separationBias = EditorGUILayout.Slider("Separation Bias", controller.separationBias, 0.001f, 2.5f);
         controller.boundaryBias = EditorGUILayout.Slider("Boundary Bias", controller.boundaryBias, 0.01f, 1.5f);
 
         controller.localFlocks = EditorGUILayout.Toggle("Use Groups?", controller.localFlocks);
-        controller.edgeWrapping = EditorGUILayout.Toggle("Enforce Wrapping?", controller.edgeWrapping);
-
+        controller.edgeWrapping = EditorGUILayout.Toggle("Enable Wrapping?", controller.edgeWrapping);
         controller.enableAlignment = EditorGUILayout.Toggle("Enable Alignment?", controller.enableAlignment);
         controller.enableCohesion = EditorGUILayout.Toggle("Enable Cohesion?", controller.enableCohesion);
         controller.enableSeparation = EditorGUILayout.Toggle("Enable Separation?", controller.enableSeparation);
@@ -50,8 +49,14 @@ public class BoidControllerEditor : Editor {
         controller.enableFOVChecks = EditorGUILayout.Toggle("Enable FOV?", controller.enableFOVChecks);
 
         // Boid Rendering
+        EditorGUI.BeginChangeCheck();
         controller.circleVertexCount = EditorGUILayout.IntSlider("Circle Vertex Count", controller.circleVertexCount, 4, 360);
         controller.circleWidth = EditorGUILayout.Slider("Circle Line Width", controller.circleWidth, 0.01f, 1f);
+        redraw = redraw || EditorGUI.EndChangeCheck();
+
+        // Inspector elements related to Boid Focusing have changed - redraw!
+        if (redraw)
+            controller.focusedBoid.Draw(true);
     }
 }
 #endif
