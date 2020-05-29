@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 
 // Boids are represented by a moving, rotating triangle.
@@ -11,7 +10,7 @@ public class Boid : MonoBehaviour {
     [NonSerialized] private bool _isWrappingX = false;
     [NonSerialized] private bool _isWrappingY = false;
     [NonSerialized] private Vector2 _centeringVelocity;
-    [NonSerialized] private int _latestNeighborhoodCount = 0;
+    [NonSerialized] public int latestNeighborhoodCount = 0;
     [NonSerialized] private BoidController _parent;
     [NonSerialized] private bool _isFocused = false;
 
@@ -36,7 +35,7 @@ public class Boid : MonoBehaviour {
         else {
             Vector2 acceleration = Vector2.zero;
             List<Boid> flock = _parent.localFlocks ? GetFlock(_parent.boids, _parent.boidGroupRange) : _parent.boids;
-            _latestNeighborhoodCount = flock.Count;
+            latestNeighborhoodCount = flock.Count;
 
             // Calculate all offsets and multiple by magnitudes given
             if (flock.Count > 0) {
@@ -66,13 +65,6 @@ public class Boid : MonoBehaviour {
         if (_parent.edgeWrapping)
             Wrapping();
     }
-
-#if UNITY_EDITOR
-    private void OnDrawGizmos() {
-        // Show # of Boids in Neighborhood
-        Handles.Label(transform.position, $"{_latestNeighborhoodCount}");
-    }
-#endif
 
     private Vector2 SteerTowards(Vector2 vector) {
         Vector2 v = vector.normalized * _parent.maxSpeed - _velocity;

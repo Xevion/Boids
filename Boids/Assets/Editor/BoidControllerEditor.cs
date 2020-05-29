@@ -2,7 +2,7 @@
 using UnityEngine;
 
 [CustomEditor(typeof(BoidController))]
-public class BoidControllerEditor : Editor {
+public class BoidControllerEditor : UnityEditor.Editor {
     public override void OnInspectorGUI() {
         var controller = (BoidController) target;
         bool redraw = false;
@@ -20,23 +20,26 @@ public class BoidControllerEditor : Editor {
         }
 
         // Basic Boid Controller Attributes
-        controller.boidStartVelocity = EditorGUILayout.Slider("Start Velocity", controller.boidStartVelocity, 0.01f, 25.0f);
-        EditorGUILayout.MinMaxSlider("Speed Limit",  ref controller.minSpeed, ref controller.maxSpeed, 0.01f, 25f);
+        controller.boidStartVelocity =
+            EditorGUILayout.Slider("Start Velocity", controller.boidStartVelocity, 0.01f, 25.0f);
+        EditorGUILayout.MinMaxSlider("Speed Limit", ref controller.minSpeed, ref controller.maxSpeed, 0.01f, 25f);
         // controller.minSpeed = EditorGUILayout.Slider("Minimum Speed", controller.minSpeed, 0.01f, 25.0f);
         // controller.maxSpeed = EditorGUILayout.Slider("Maximum Speed", controller.maxSpeed, 0.01f, 25.0f);
         controller.boundaryForce = EditorGUILayout.Slider("Boundary Force", controller.boundaryForce, 0.25f, 50f);
         controller.maxSteerForce = EditorGUILayout.Slider("Max Steer Force", controller.maxSteerForce, 1f, 500f);
-        
+
         EditorGUI.BeginChangeCheck();
         controller.boidGroupRange = EditorGUILayout.Slider("Group Range", controller.boidGroupRange, 0.01f, 7.5f);
-        controller.boidSeparationRange = EditorGUILayout.Slider("Separation Range", controller.boidSeparationRange, 0.01f, 5.0f);
+        controller.boidSeparationRange =
+            EditorGUILayout.Slider("Separation Range", controller.boidSeparationRange, 0.01f, 5.0f);
         controller.boidFOV = EditorGUILayout.Slider("Boid FOV", controller.boidFOV, 1f, 360f);
         redraw = redraw || EditorGUI.EndChangeCheck();
-        
-            // Boid Bias Attributes
+
+        // Boid Bias Attributes
         controller.alignmentBias = EditorGUILayout.Slider("Alignment Bias", controller.alignmentBias, 0.001f, 1.5f);
         controller.cohesionBias = EditorGUILayout.Slider("Cohesion Bias", controller.cohesionBias, 0.001f, 1.5f);
-        controller.separationBias = EditorGUILayout.Slider("Separation Bias", controller.separationBias, 0.001f, 2.5f);
+        controller.separationBias =
+            EditorGUILayout.Slider("Separation Bias", controller.separationBias, 0.001f, 2.5f);
         controller.boundaryBias = EditorGUILayout.Slider("Boundary Bias", controller.boundaryBias, 0.01f, 1.5f);
 
         controller.localFlocks = EditorGUILayout.Toggle("Use Groups?", controller.localFlocks);
@@ -49,7 +52,8 @@ public class BoidControllerEditor : Editor {
 
         // Boid Rendering
         EditorGUI.BeginChangeCheck();
-        controller.circleVertexCount = EditorGUILayout.IntSlider("Circle Vertex Count", controller.circleVertexCount, 4, 360);
+        controller.circleVertexCount =
+            EditorGUILayout.IntSlider("Circle Vertex Count", controller.circleVertexCount, 4, 360);
         controller.circleWidth = EditorGUILayout.Slider("Circle Line Width", controller.circleWidth, 0.01f, 1f);
         redraw = redraw || EditorGUI.EndChangeCheck();
 
