@@ -1,18 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+    using UnityEditor;
 using UnityEngine;
 
 // Boids are represented by a moving, rotating triangle.
 // Boids should communicate with sibling Boids via the parental BoidController object
 public class Boid : MonoBehaviour {
     [NonSerialized] private Vector2 _position = Vector2.zero;
-    [NonSerialized] private Vector2 _velocity;
+    [NonSerialized] public Vector2 _velocity;
     [NonSerialized] private bool _isWrappingX = false;
     [NonSerialized] private bool _isWrappingY = false;
     [NonSerialized] private Vector2 _centeringVelocity;
     [NonSerialized] public int latestNeighborhoodCount = 0;
+    [NonSerialized] public List<Boid> latestNeighborhood;
     [NonSerialized] private BoidController _parent;
-    [NonSerialized] private bool _isFocused = false;
+    [NonSerialized] public bool _isFocused = false;
 
     private void Start() {
         _parent = transform.parent
@@ -36,6 +38,10 @@ public class Boid : MonoBehaviour {
             Vector2 acceleration = Vector2.zero;
             List<Boid> flock = _parent.localFlocks ? GetFlock(_parent.boids, _parent.boidGroupRange) : _parent.boids;
             latestNeighborhoodCount = flock.Count;
+
+            // Only update latest neighborhood when we need it for focused boid gizmo draws
+            if (_isFocused)
+                latestNeighborhood = flock;
 
             // Calculate all offsets and multiple by magnitudes given
             if (flock.Count > 0) {
@@ -173,10 +179,13 @@ public class Boid : MonoBehaviour {
 
             // FOV Check
             if (_parent.enableFOVChecks) {
-                float angle1 = Mathf.Rad2Deg * -Mathf.Atan2(_velocity.x, _velocity.y);
-                float angle2 = Mathf.Rad2Deg * -Mathf.Atan2(boid._velocity.x, boid._velocity.y);
-                if (Mathf.Abs(angle2 - angle1) > _parent.boidFOV / 2)
+                float angle1 = Util.Vector2ToAngle(_velocity); // Current Heading
+                float angle2 = Util.AngleBetween(transform.position, boid.transform.position);  // Angle between Boid and other Boid
+
+                // Outside of FOV range, skip
+                if (Mathf.Abs(Mathf.DeltaAngle(angle1, angle2)) > _parent.boidFOV / 2)
                     continue;
+                
             }
 
             flock.Add(boid);
@@ -224,7 +233,7 @@ public class Boid : MonoBehaviour {
         DrawCircle(_parent.boidGroupRange, "Group Range Circle");
 
         // Draw FOV Line
-        DrawArcCentered((_parent.boidSeparationRange + _parent.boidGroupRange) / 2f, transform.eulerAngles.z,
+        DrawArcCentered(_parent.boidGroupRange, Util.Vector2ToAngle(_velocity),
             _parent.boidFOV, "FOV Arc");
     }
 
@@ -254,7 +263,8 @@ public class Boid : MonoBehaviour {
     }
 
     private void DrawArcCentered(float radius, float centerAngle, float angleWidth, string childName) {
-        DrawArc(radius, centerAngle - angleWidth / 2f, centerAngle + angleWidth / 2f, childName);
+        float half = angleWidth / 2f;
+        DrawArc(radius, Util.AddAngle(centerAngle, -half), Util.AddAngle(centerAngle, half), childName);
     }
 
     private void DrawArc(float radius, float from, float to, string childName) {
@@ -275,10 +285,11 @@ public class Boid : MonoBehaviour {
         // Calculate points for circle
         var pointCount = vertexCount + 1;
         var points = new Vector3[pointCount + 2];
+        
         for (int i = 0; i < pointCount; i++) {
             // Magic '180 - angle'
-            var rad = Mathf.Deg2Rad * (180 - Mathf.LerpAngle(from, to, i / (float) pointCount));
-            points[i + 1] = new Vector3(Mathf.Sin(rad) * radius, Mathf.Cos(rad) * radius, 0);
+            var rad = Mathf.Deg2Rad * Mathf.LerpAngle(from, to, i / (float) pointCount);
+            points[i + 1] = new Vector3(Mathf.Sin(rad), Mathf.Cos(rad), 0) * radius;
         }
 
         points[0] = new Vector3(0, 0, 0);

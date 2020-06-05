@@ -6,13 +6,13 @@ public class Util {
         var sa = Mathf.Sin(a);
         var rx = v.x * ca - v.y * sa;
 
-        return new Vector2((float) rx, (float) (v.x * sa + v.y * ca));
+        return new Vector2(rx, v.x * sa + v.y * ca);
     }
 
     // Returns a velocity (Vector2) at a random angle with a specific overall magnitude
     public static Vector2 GetRandomVelocity(float magnitude) {
         var vector = new Vector2(magnitude, magnitude);
-        return Util.RotateBy(vector, Random.Range(0, 180));
+        return RotateBy(vector, Random.Range(0, 180));
     }
 
     public static Vector2 MaxVelocity(Vector2 v, float max) {
@@ -27,24 +27,25 @@ public class Util {
         return v;
     }
 
-    public static Vector2 AbsVector(Vector2 vector) {
-        return new Vector2(vector.x, vector.y);
+    public static float Vector2ToAngle(Vector2 velocity) {
+        float result = Mathf.Rad2Deg * Mathf.Atan2(velocity.y, velocity.x);
+        return (result < 0) ? (360f + result) : result;
     }
-}
 
-public class Scale {
-    private Vector2 _original;
-    private Vector2 _new;
-    private Vector2 _ratio;
+    public static float AngleBetween(Vector2 from, Vector2 to) {
+        Vector2 diff = to - from;
+        float result = Mathf.Rad2Deg * Mathf.Atan2(diff.y, diff.x);
+        return (result < 0) ? (360f + result) : result;
+    }
 
-    public float X => _ratio.x;
-    public float Y => _ratio.y;
+    public static float AngleDifference(float angle1, float angle2) {
+        return Mathf.Abs((angle1 > 180 ? 360 - angle1 : angle1) - (angle2 > 180 ? 360 - angle2 : angle2));
+    }
 
-    public Scale(Vector2 original, Canvas canvas) : this(original, canvas.pixelRect.size) { }
-
-    public Scale(Vector2 original, Vector2 resized) {
-        _original = original;
-        _new = resized;
-        _ratio = _original / _new;
+    public static float AddAngle(float angle, float add) {
+        float result = angle + add;
+        if (result > 360) return result - 360;
+        if (result < 0) return 360 + result;
+        return result;
     }
 }
