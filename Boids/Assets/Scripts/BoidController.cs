@@ -78,6 +78,12 @@ public class BoidController : MonoBehaviour {
             focusedBoid = boids[Random.Range(0, boids.Count)];
             focusedBoid.EnableFocusing();
         }
+        
+        // Focus on the boid in scene view when one is focused
+        #if UNITY_EDITOR
+        if(focusedBoid != null)
+            SceneView.lastActiveSceneView.LookAt(focusedBoid.transform.position, Quaternion.identity);
+        #endif
     }
 
     private void Start() {
