@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // Boids are represented by a moving, rotating triangle.
-// Boids should communicate with sibling Boids
+// Boids should communicate with sibling Boids via the parental BoidController object
 public class Boid : MonoBehaviour {
     [NonSerialized] private Vector2 _position = Vector2.zero;
     [NonSerialized] private Vector2 _velocity;
