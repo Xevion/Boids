@@ -54,7 +54,9 @@ public class BoidControllerEditor : UnityEditor.Editor {
         EditorGUI.BeginChangeCheck();
         controller.circleVertexCount =
             EditorGUILayout.IntSlider("Circle Vertex Count", controller.circleVertexCount, 4, 360);
-        controller.circleWidth = EditorGUILayout.Slider("Circle Line Width", controller.circleWidth, 0.01f, 1f);
+        // controller.arcVertexCount =
+            // EditorGUILayout.IntSlider("Arc Vertex Count", controller.arcVertexCount, -1, 360);
+            controller.circleWidth = EditorGUILayout.Slider("Circle Line Width", controller.circleWidth, 0.01f, 1f);
         redraw = redraw || EditorGUI.EndChangeCheck();
 
         // Inspector elements related to Boid Focusing have changed - redraw!
