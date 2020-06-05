@@ -261,41 +261,4 @@ public class Boid : MonoBehaviour {
         // Add points to LineRenderer
         line.SetPositions(points);
     }
-
-    private void DrawArcCentered(float radius, float centerAngle, float angleWidth, string childName) {
-        float half = angleWidth / 2f;
-        DrawArc(radius, Util.AddAngle(centerAngle, -half), Util.AddAngle(centerAngle, half), childName);
-    }
-
-    private void DrawArc(float radius, float from, float to, string childName) {
-        // Create a new child GameObject to hold the LineRenderer Component
-        var child = new GameObject(childName);
-        child.transform.SetParent(transform);
-        child.transform.position = transform.position;
-        var line = child.AddComponent<LineRenderer>();
-
-        int vertexCount = _parent.arcVertexCount != -1 ? _parent.arcVertexCount : (int) Mathf.Abs(from - to) * 2;
-
-        // Setup LineRenderer properties
-        line.useWorldSpace = false;
-        line.startWidth = _parent.circleWidth;
-        line.endWidth = _parent.circleWidth;
-        line.positionCount = vertexCount + 1 + 2;
-
-        // Calculate points for circle
-        var pointCount = vertexCount + 1;
-        var points = new Vector3[pointCount + 2];
-        
-        for (int i = 0; i < pointCount; i++) {
-            // Magic '180 - angle'
-            var rad = Mathf.Deg2Rad * Mathf.LerpAngle(from, to, i / (float) pointCount);
-            points[i + 1] = new Vector3(Mathf.Sin(rad), Mathf.Cos(rad), 0) * radius;
-        }
-
-        points[0] = new Vector3(0, 0, 0);
-        points[points.Length - 1] = points[0];
-
-        // Add points to LineRenderer
-        line.SetPositions(points);
-    }
 }
