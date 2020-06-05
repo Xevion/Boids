@@ -197,7 +197,7 @@ public class Boid : MonoBehaviour {
     // Sets up a Boid to be 'Focused', adds Circles around object and changes color
     public void EnableFocusing() {
         if (_isFocused) {
-            Debug.LogWarning("enableFocusing called on previously focused Boid");
+            Debug.LogWarning($"enableFocusing called on previously focused Boid ({transform.name})");
             return;
         }
 
@@ -207,6 +207,7 @@ public class Boid : MonoBehaviour {
         var triangle = transform.GetComponent<Triangle>();
         triangle.meshRenderer.material.color = Color.red;
 
+        // Draw all focus related elements
         Draw(false);
     }
 
@@ -223,6 +224,18 @@ public class Boid : MonoBehaviour {
             Destroy(child.gameObject);
     }
 
+    /// <summary>
+    /// returns a new LineRenderer component stored on a child GameObject.
+    /// </summary>
+    /// <param name="childName">The name of the associated child GameObject</param>
+    /// <returns>A LineRenderer</returns>
+    public LineRenderer GetLineRenderer(string childName) {
+        var child = new GameObject(childName);
+        child.transform.SetParent(transform);
+        child.transform.position = transform.position;
+        return child.AddComponent<LineRenderer>();
+    }
+
     public void Draw(bool redraw) {
         if (redraw)
             foreach (Transform child in transform)
@@ -235,30 +248,5 @@ public class Boid : MonoBehaviour {
         // Draw FOV Line
         DrawArcCentered(_parent.boidGroupRange, Util.Vector2ToAngle(_velocity),
             _parent.boidFOV, "FOV Arc");
-    }
-
-    private void DrawCircle(float radius, string childName) {
-        // Create a new child GameObject to hold the LineRenderer Component
-        var child = new GameObject(childName);
-        child.transform.SetParent(transform);
-        child.transform.position = transform.position;
-        var line = child.AddComponent<LineRenderer>();
-
-        // Setup LineRenderer properties
-        line.useWorldSpace = false;
-        line.startWidth = _parent.circleWidth;
-        line.endWidth = _parent.circleWidth;
-        line.positionCount = _parent.circleVertexCount + 1;
-
-        // Calculate points for circle
-        var pointCount = _parent.circleVertexCount + 1;
-        var points = new Vector3[pointCount];
-        for (int i = 0; i < pointCount; i++) {
-            var rad = Mathf.Deg2Rad * (i * 360f / _parent.circleVertexCount);
-            points[i] = new Vector3(Mathf.Sin(rad) * radius, Mathf.Cos(rad) * radius, 0);
-        }
-
-        // Add points to LineRenderer
-        line.SetPositions(points);
     }
 }

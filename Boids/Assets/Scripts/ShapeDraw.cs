@@ -46,8 +46,23 @@ public class ShapeDraw {
     /// Draw a Circle with a specific radius and number of vertexes (detail level)
     /// </summary>
     /// <param name="lineRenderer"></param>
-    public static void DrawCircle(LineRenderer lineRenderer) {
-        
+    public static void DrawCircle(LineRenderer lineRenderer, float radius) {
+        // Setup LineRenderer properties
+        lineRenderer.useWorldSpace = false;
+        lineRenderer.startWidth = CircleWidth;
+        lineRenderer.endWidth = CircleWidth;
+        lineRenderer.positionCount = CircleVertexCount + 1;
+
+        // Calculate points for circle
+        var pointCount = CircleVertexCount + 1;
+        var points = new Vector3[pointCount];
+        for (int i = 0; i < pointCount; i++) {
+            var rad = Mathf.Deg2Rad * (i * 360f / CircleVertexCount);
+            points[i] = new Vector3(Mathf.Sin(rad) * radius, Mathf.Cos(rad) * radius, 0);
+        }
+
+        // Add points to LineRenderer
+        lineRenderer.SetPositions(points);
     }
 
     /// <summary>
