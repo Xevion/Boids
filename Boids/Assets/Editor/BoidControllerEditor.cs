@@ -64,5 +64,7 @@ public class BoidControllerEditor : UnityEditor.Editor {
         // Inspector elements related to Boid Focusing have changed - redraw!
         if (redraw && controller.focusedBoid != null)
             controller.focusedBoid.Draw(true);
+
+        Time.timeScale = EditorGUILayout.Slider("Time Scale", Time.timeScale, 0.02f, 1f);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -82,6 +83,17 @@ public class BoidController : MonoBehaviour {
     private void Start() {
         SetupCamera();
         AddBoids(boidCount);
+
+        StartCoroutine(LateStart());
+    }
+
+    private IEnumerator LateStart() {
+        yield return new WaitForSecondsRealtime(0.5f);
+
+        for (int i = 0; i < 100; i++) {
+            foreach (Boid boid in boids)
+                boid.velocity = boid.GetVelocity();
+        }
     }
 
     /// <summary>
@@ -115,11 +127,13 @@ public class BoidController : MonoBehaviour {
         for (int i = 0; i < n; i++) {
             // Instantiate a Boid prefab within the boundaries randomly
             Vector2 position = useNearby ? RandomNearbyPosition() : RandomPosition() * 0.90f;
-            GameObject boid = Instantiate(boidObject, position, Quaternion.identity);
+            GameObject boidGO = Instantiate(boidObject, position, Quaternion.identity);
 
             // Set parent, add Boid component to Boids list
-            boid.transform.parent = transform;
-            boids.Add(boid.GetComponent<Boid>());
+            boidGO.transform.parent = transform;
+            var boid = boidGO.GetComponent<Boid>();
+            
+            boids.Add(boid);
         }
     }
 

@@ -81,7 +81,7 @@ public class AdjustmentsHandler : MonoBehaviour {
                 // Calculate diff, formally add/remove boids
                 int diff = controller.boidCount - controller.boids.Count;
                 if(diff > 0)
-                    controller.AddBoids(diff);
+                    controller.AddBoids(diff, controller.boidCount > 5);
                 else if(diff < 0)
                     controller.RemoveBoids(diff * -1);
                 

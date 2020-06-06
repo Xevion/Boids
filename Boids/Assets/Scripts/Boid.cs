@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class Boid : MonoBehaviour {
@@ -24,8 +25,7 @@ public class Boid : MonoBehaviour {
     private void Start() {
         _parent = transform.parent
             .GetComponent<BoidController>(); // Parent used to perform physics math without caching
-        velocity = Util.GetRandomVelocity(Random.Range(_parent.minSpeed,
-            _parent.maxSpeed)); // Acquire a Velocity Vector with a magnitude
+        velocity = Util.GetRandomVelocity(Random.Range(_parent.minSpeed, _parent.maxSpeed));
         _position = transform.position; // Track 2D position separately
         transform.name = $"Boid {transform.GetSiblingIndex()}"; // Name the Game Object so Boids can be tracked somewhat
     }
@@ -41,43 +41,56 @@ public class Boid : MonoBehaviour {
             transform.position = _position;
         }
         else {
-            // Find local neighborhood flock
-            Vector2 acceleration = Vector2.zero;
-            List<Boid> flock = _parent.localFlocks ? GetFlock(_parent.boids, _parent.boidGroupRange) : _parent.boids;
-            latestNeighborhoodCount = flock.Count;
-
-            // Only update latest neighborhood when we need it for focused boid Gizmo draws
-            if (isFocused)
-                latestNeighborhood = flock;
-
-            // Calculate all offsets and multiple by magnitudes given
-            if (flock.Count > 0) {
-                if (_parent.enableCohesion)
-                    acceleration += SteerTowards(Rule1(flock)) * _parent.cohesionBias;
-                if (_parent.enableSeparation)
-                    acceleration += SteerTowards(Rule2(flock)) * _parent.separationBias;
-                if (_parent.enableAlignment)
-                    acceleration += SteerTowards(Rule3(flock)) * _parent.alignmentBias;
-            }
-
-            if (_parent.enableBoundary && !_parent.Boundary.Contains(_position)) {
-                acceleration += SteerTowards(RuleBound()) * _parent.boundaryBias;
-            }
-
-            // Limit the Velocity Vector to a certain Magnitude
-            velocity += acceleration * Time.deltaTime;
-            float speed = velocity.magnitude;
-            Vector2 dir = velocity / speed;
-            speed = Mathf.Clamp(speed, _parent.minSpeed, _parent.maxSpeed);
-            velocity = dir * speed;
-
+            velocity = GetVelocity();
             _position += velocity * Time.deltaTime;
             transform.position = _position;
-            // transform.forward = dir;
         }
 
+        // Perform edge wrapping
         if (_parent.edgeWrapping)
             Wrapping();
+    }
+
+    /// <summary>
+    /// Gets Velocity used to move Boid with all current rules and velocity
+    /// </summary>
+    /// <returns>new current Vector2 velocity</returns>
+    public Vector2 GetVelocity() {
+        // Find local neighborhood flock
+        Vector2 acceleration = Vector2.zero;
+        List<Boid> flock;
+
+        if (_parent.localFlocks)
+            flock = GetFlock(_parent.boids, _parent.boidGroupRange);
+        else
+            flock = _parent.boids;
+        
+        latestNeighborhoodCount = flock.Count;
+
+        // Only update latest neighborhood when we need it for focused boid Gizmo draws
+        if (isFocused)
+            latestNeighborhood = flock;
+
+        // Calculate all offsets and multiple by magnitudes given
+        if (flock.Count > 0) {
+            if (_parent.enableCohesion)
+                acceleration += SteerTowards(Rule1(flock)) * _parent.cohesionBias;
+            if (_parent.enableSeparation)
+                acceleration += SteerTowards(Rule2(flock)) * _parent.separationBias;
+            if (_parent.enableAlignment)
+                acceleration += SteerTowards(Rule3(flock)) * _parent.alignmentBias;
+        }
+
+        if (_parent.enableBoundary && !_parent.Boundary.Contains(_position)) {
+            acceleration += SteerTowards(RuleBound()) * _parent.boundaryBias;
+        }
+
+        // Limit the Velocity Vector to a certain Magnitude
+        Vector2 newVelocity = velocity +  acceleration * Time.deltaTime;
+        float speed = newVelocity.magnitude;
+        Vector2 dir = newVelocity / speed;
+        speed = Mathf.Clamp(speed, _parent.minSpeed, _parent.maxSpeed);
+        return dir * speed;
     }
 
     /// <summary>
@@ -90,6 +103,9 @@ public class Boid : MonoBehaviour {
         return Vector2.ClampMagnitude(v, _parent.maxSteerForce);
     }
 
+    /// <summary>
+    /// Runs edge wrapping logic for detecting and wrapping Boids
+    /// </summary>
     private void Wrapping() {
         if (!_parent.Space.Contains(_position)) {
             // Activate Wrap, Move
@@ -294,5 +310,27 @@ public class Boid : MonoBehaviour {
     public Vector2 GetNearby(float distance) {
         return _position + Util.RotateBy(new Vector2(distance, distance),
             Random.Range(0f, 360f));
+    }
+
+    public Boid GetClosestBoid() {
+        if (_parent.boids.Count <= 1)
+            return null;
+        
+        Boid best = _parent.boids[0];
+        float curDistSqr = Mathf.Infinity;
+        
+        foreach (Boid potential in _parent.boids) {
+            if (potential == this)
+                continue;
+            
+            Vector2 diff = potential._position - _position;
+            var diffSqrMag = diff.sqrMagnitude;
+            if (diffSqrMag < curDistSqr) {
+                curDistSqr = diffSqrMag;
+                best = potential;
+            }
+        }
+
+        return best;
     }
 }
