@@ -4,12 +4,14 @@
 /// A simple static utility class that assists with drawing shapes using the <c>LineRenderer</c> class.
 /// </summary>
 public static class ShapeDraw {
-    public static float CircleWidth = 1f;
-    public static float ArcWidth = 1f;
-    public static int CircleVertexCount = 360;
-    public static int ArcVertexCount = 77;
-    
-    
+    // Line width of the Circle and Arc
+    public static float CircleWidth = 0.1f;
+    public static float ArcWidth = 0.1f;
+    // Vertex count for Circle and Arc - the precision or detail level the curves have
+    // Low vertex counts are mostly unnoticeable until < 30 vertexes, where eventually squares and triangles appear
+    public static int CircleVertexCount = 180;
+    public static int ArcVertexCount = 90;
+
     /// <summary>
     /// Draw a Arc aimed straight up with a certain angle width and radius.
     /// This Arc is not direct at any specific angle and start from 0 degrees and ends at <c>angle</c> degrees.

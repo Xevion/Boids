@@ -180,12 +180,12 @@ public class Boid : MonoBehaviour {
                 continue;
 
             // FOV Check
-            if (_parent.enableFOVChecks) {
+            if (_parent.enableFovChecks) {
                 float angle1 = Util.Vector2ToAngle(_velocity); // Current Heading
                 float angle2 = Util.AngleBetween(transform.position, boid.transform.position);  // Angle between Boid and other Boid
 
                 // Outside of FOV range, skip
-                if (Mathf.Abs(Mathf.DeltaAngle(angle1, angle2)) > _parent.boidFOV / 2)
+                if (Mathf.Abs(Mathf.DeltaAngle(angle1, angle2)) > _parent.boidFov / 2)
                     continue;
                 
             }
@@ -258,16 +258,16 @@ public class Boid : MonoBehaviour {
                 lineRenderer.positionCount = 0;
         
         // Add a LineRenderer for Radius Drawing
-        if(_parent.enableFOVChecks)
-            ShapeDraw.DrawArc(_lineRenderers[2], _parent.boidFOV, _parent.boidGroupRange); // FOV Arc
+        if(_parent.enableFovChecks)
+            ShapeDraw.DrawArc(_lineRenderers[2], _parent.boidFov, _parent.boidGroupRange); // FOV Arc
         else
             ShapeDraw.DrawCircle(_lineRenderers[0], _parent.boidGroupRange); // Group Circle
         ShapeDraw.DrawCircle(_lineRenderers[1], _parent.boidSeparationRange); // Separation Circle
 
-        if (_parent.enableFOVChecks) {
+        if (_parent.enableFovChecks) {
             // Set FOV Arc rotation to mimic Boid transform rotation
             _lineRenderers[2].transform.rotation = transform.rotation;
-            _lineRenderers[2].transform.Rotate(0, 0, _parent.boidFOV / 2f);
+            _lineRenderers[2].transform.Rotate(0, 0, _parent.boidFov / 2f);
         }
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using Debug = System.Diagnostics.Debug;
 using Random = UnityEngine.Random;
 
 public class BoidController : MonoBehaviour {
@@ -28,17 +29,17 @@ public class BoidController : MonoBehaviour {
     [SerializeField] public bool enableAlignment = true;
     [SerializeField] public bool enableCohesion = true;
     [SerializeField] public bool enableBoundary = true;
-    [SerializeField] public bool enableFOVChecks = true;
+    [SerializeField] public bool enableFovChecks = true;
 
     [SerializeField] public float boidSeparationRange = 2.3f; // Boid Separation rule's activation distance
     [SerializeField] public float boundaryForce = 10f; // The force applied when a Boid hits the boundary
     [SerializeField] public bool localFlocks = true; // Calculate Local 'Neighborhood' for flocks?
     [SerializeField] public bool edgeWrapping = true; // Enforce Edge Wrapping
     [SerializeField] public int circleVertexCount = 360; // The number of vertices for circles displayed
-    [SerializeField] public int arcVertexCount = -1; // The number of vertices for arcs displayed, -1 for auto
+    [SerializeField] public int arcVertexCount = 180; // The number of vertices for arcs displayed, -1 for auto
     [SerializeField] public float circleWidth = 0.1f; // Width of circle
     [SerializeField] public float maxSteerForce = 10f;
-    [SerializeField] public float boidFOV = 160;
+    [SerializeField] public float boidFov = 220;
 
 
     public Boid focusedBoid; // A focused Boid has special rendering
@@ -50,11 +51,6 @@ public class BoidController : MonoBehaviour {
         // Draw a Wire Cube for the Rectangle Area
         Gizmos.DrawWireCube(Space.center, Space.size);
         Gizmos.DrawWireCube(Boundary.center, Boundary.size);
-
-#if UNITY_EDITOR
-        if (focusedBoid != null)
-            Handles.DrawWireDisc(focusedBoid.transform.position, Vector3.forward, boidGroupRange);
-#endif
 
         if (Cam == null)
             return;
@@ -75,6 +71,7 @@ public class BoidController : MonoBehaviour {
             if (focusedBoid != null)
                 focusedBoid.DisableFocusing();
 
+            // Pick a Boid randomly and enable focusing
             focusedBoid = boids[Random.Range(0, boids.Count)];
             focusedBoid.EnableFocusing();
         }
@@ -87,25 +84,37 @@ public class BoidController : MonoBehaviour {
     }
 
     private void Start() {
+        SetupCamera();
+        AddBoids(boidCount);
+    }
+
+    /// <summary>
+    /// Utility function for setting up Camera and Boundary related variables.
+    /// </summary>
+    private void SetupCamera() {
         // Setup Camera
         Cam = Camera.main;
 
+        // Assert that there is an active camera
+        Debug.Assert(Cam != null, nameof(Cam) + " != null");
+        
         // Size the Rectangle based on the Camera's Orthographic View
         float height = 2f * Cam.orthographicSize;
         var size = new Vector2(height * Cam.aspect, height);
         Space = new Rect((Vector2) transform.position - size / 2, size);
         Boundary = new Rect(Vector2.zero, Space.size * 0.95f);
         Boundary.center = Space.center;
-
-        ShapeDraw.CircleWidth = circleWidth;
-        ShapeDraw.ArcWidth = circleWidth;
-        ShapeDraw.CircleVertexCount = circleVertexCount;
-        // ShapeDraw.ArcVertexCount = arcVertexCount;
-
-        AddBoids(boidCount);
     }
 
+    /// <summary>
+    /// Adds a number of boids.
+    /// </summary>
+    /// <param name="n"></param>
     public void AddBoids(int n) {
+        // Skip if negative or zero
+        if (n <= 0)
+            return;
+        
         for (int i = 0; i < n; i++) {
             // Instantiate a Boid prefab within the boundaries randomly
             Vector2 position = RandomPosition() * 0.95f;
@@ -117,7 +126,12 @@ public class BoidController : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Removes a number of boids.
+    /// </summary>
+    /// <param name="n">Number of Boids to Remove</param>
     public void RemoveBoids(int n) {
+        // If there are still Boids to remove and the number left to remove is more than 1 (post-decrementing)
         while (n-- > 0 && boids.Count >= 1) {
             int index = Random.Range(0, boids.Count - 1);
 
@@ -132,12 +146,20 @@ public class BoidController : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Remove a Boid at a specific index in the Boids array.
+    /// </summary>
+    /// <param name="index"></param>
     private void RemoveBoid(int index) {
         Boid boid = boids[index];
         boids.RemoveAt(index);
         Destroy(boid.transform.gameObject);
     }
 
+    /// <summary>
+    /// Returns a random valid Boid position
+    /// </summary>
+    /// <returns>A Vector2 position within the Boid boundary area</returns>
     private Vector2 RandomPosition() {
         return new Vector2(
             Random.Range(-Boundary.size.x, Boundary.size.x) / 2,

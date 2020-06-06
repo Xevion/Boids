@@ -9,7 +9,7 @@ public class BoidControllerEditor : UnityEditor.Editor {
 
         // Boid Count update
         EditorGUI.BeginChangeCheck();
-        controller.boidCount = EditorGUILayout.IntSlider("Boid Count", controller.boidCount, 1, 500);
+        controller.boidCount = EditorGUILayout.IntSlider("Boid Count", controller.boidCount, -1, 500);
         // Check must be performed or Boids will be added outside of gameplay
         if (EditorGUI.EndChangeCheck() && Application.isPlaying) {
             int diff = controller.boidCount - controller.boids.Count;
@@ -32,7 +32,7 @@ public class BoidControllerEditor : UnityEditor.Editor {
         controller.boidGroupRange = EditorGUILayout.Slider("Group Range", controller.boidGroupRange, 0.01f, 7.5f);
         controller.boidSeparationRange =
             EditorGUILayout.Slider("Separation Range", controller.boidSeparationRange, 0.01f, 5.0f);
-        controller.boidFOV = EditorGUILayout.Slider("Boid FOV", controller.boidFOV, 1f, 360f);
+        controller.boidFov = EditorGUILayout.Slider("Boid FOV", controller.boidFov, 1f, 360f);
         redraw = redraw || EditorGUI.EndChangeCheck();
 
         // Boid Bias Attributes
@@ -47,20 +47,24 @@ public class BoidControllerEditor : UnityEditor.Editor {
         controller.enableAlignment = EditorGUILayout.Toggle("Enable Alignment?", controller.enableAlignment);
         controller.enableCohesion = EditorGUILayout.Toggle("Enable Cohesion?", controller.enableCohesion);
         controller.enableSeparation = EditorGUILayout.Toggle("Enable Separation?", controller.enableSeparation);
-        controller.enableBoundary = EditorGUILayout.Toggle("Enable Boundary?", controller.enableBoundary);
-        controller.enableFOVChecks = EditorGUILayout.Toggle("Enable FOV?", controller.enableFOVChecks);
-
-        // Boid Rendering
+        
+        // Relevant to Focused Boid Rendering
         EditorGUI.BeginChangeCheck();
-        controller.circleVertexCount =
-            EditorGUILayout.IntSlider("Circle Vertex Count", controller.circleVertexCount, 4, 360);
-        // controller.arcVertexCount =
-            // EditorGUILayout.IntSlider("Arc Vertex Count", controller.arcVertexCount, -1, 360);
-            controller.circleWidth = EditorGUILayout.Slider("Circle Line Width", controller.circleWidth, 0.01f, 1f);
+        controller.enableFovChecks = EditorGUILayout.Toggle("Enable FOV?", controller.enableFovChecks);
+        redraw = redraw || EditorGUI.EndChangeCheck();
+        
+        controller.enableBoundary = EditorGUILayout.Toggle("Enable Boundary?", controller.enableBoundary);
+        
+        // Focused Boid Rendering Attributes
+        EditorGUI.BeginChangeCheck();
+        ShapeDraw.CircleVertexCount = EditorGUILayout.IntSlider("Circle Vertex Count", ShapeDraw.CircleVertexCount, 4, 360);
+        ShapeDraw.ArcVertexCount = EditorGUILayout.IntSlider("Arc Vertex Count", ShapeDraw.ArcVertexCount + 2, 3, 360) - 2;
+        ShapeDraw.CircleWidth = EditorGUILayout.Slider("Circle Line Width", ShapeDraw.CircleWidth, 0.01f, 1f);
+        ShapeDraw.ArcWidth = EditorGUILayout.Slider("Arc Line Width", ShapeDraw.ArcWidth, 0.01f, 1f);
         redraw = redraw || EditorGUI.EndChangeCheck();
 
         // Inspector elements related to Boid Focusing have changed - redraw!
-        if (redraw)
+        if (redraw && controller.focusedBoid != null)
             controller.focusedBoid.Draw(true);
     }
 }
