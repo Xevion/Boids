@@ -6,42 +6,43 @@ using Debug = System.Diagnostics.Debug;
 using Random = UnityEngine.Random;
 
 public class BoidController : MonoBehaviour {
-    // Controller Attributes
-    [NonSerialized] public Rect Space;
-    [NonSerialized] public Rect Boundary;
 
+    // Manually managed/set
+    public GameObject boidObject; // Boid Object Prefab
+    
     // Swarm Attributes
-    [SerializeField] public int boidCount = 250;
-    [SerializeField] public float boidGroupRange = 3.3f;
-    [SerializeField] public float minSpeed;
-    [SerializeField] public float maxSpeed;
+    public int boidCount = 250;
+    public float boidGroupRange = 3.3f;
+    public float minSpeed;
+    public float maxSpeed;
 
     // Boid Rules are multiplied by this to allow rule 'tweaking'
-    [SerializeField] public float globalBias = 1.0f;
-    [SerializeField] public float separationBias = 2f;
-    [SerializeField] public float alignmentBias = 0.288f;
-    [SerializeField] public float cohesionBias = 0.3f;
-    [SerializeField] public float boundaryBias = 1.5f;
+    public float globalBias = 1.0f;
+    public float separationBias = 2f;
+    public float alignmentBias = 0.288f;
+    public float cohesionBias = 0.3f;
+    public float boundaryBias = 1.5f;
 
     // Enable/Disable Boid Rules Altogether
-    [SerializeField] public bool enableSeparation = true;
-    [SerializeField] public bool enableAlignment = true;
-    [SerializeField] public bool enableCohesion = true;
-    [SerializeField] public bool enableBoundary = true;
-    [SerializeField] public bool enableFovChecks = true;
+    public bool enableSeparation = true;
+    public bool enableAlignment = true;
+    public bool enableCohesion = true;
+    public bool enableBoundary = true;
+    public bool enableFovChecks = true;
 
-    [SerializeField] public float boidSeparationRange = 1.4f; // Boid Separation rule's activation distance
-    [SerializeField] public float boundaryForce = 50f; // The force applied when a Boid hits the boundary
-    [SerializeField] public bool localFlocks = true; // Calculate Local 'Neighborhood' for flocks?
-    [SerializeField] public bool edgeWrapping = true; // Enforce Edge Wrapping
-    [SerializeField] public float maxSteerForce = 400f;
-    [SerializeField] public float boidFov = 240;
+    public float boidSeparationRange = 1.4f; // Boid Separation rule's activation distance
+    public float boundaryForce = 50f; // The force applied when a Boid hits the boundary
+    public bool localFlocks = true; // Calculate Local 'Neighborhood' for flocks?
+    public bool edgeWrapping = true; // Enforce Edge Wrapping
+    public float maxSteerForce = 400f;
+    public float boidFov = 240;
 
-
-    public Boid focusedBoid; // A focused Boid has special rendering
-    public GameObject boidObject; // Boid Object Prefab
+    // Runtime Controller Attributes
     [NonSerialized] public List<Boid> boids = new List<Boid>(); // Boid Objects for Updates
+    [NonSerialized] public Rect Space;
+    [NonSerialized] public Rect Boundary;
     [NonSerialized] public Camera Cam; // Used for wrapping detection
+    public Boid focusedBoid; // A focused Boid has special rendering
 
     private void OnDrawGizmos() {
         // Draw a Wire Cube for the Rectangle Area

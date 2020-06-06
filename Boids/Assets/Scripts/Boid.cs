@@ -1,35 +1,38 @@
-﻿using System;
-using System.Collections.Generic;
-    using UnityEditor;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
-// Boids are represented by a moving, rotating triangle.
-// Boids should communicate with sibling Boids via the parental BoidController object
 public class Boid : MonoBehaviour {
-    [NonSerialized] private Vector2 _position = Vector2.zero;
-    [NonSerialized] public Vector2 _velocity;
-    [NonSerialized] private bool _isWrappingX = false;
-    [NonSerialized] private bool _isWrappingY = false;
-    [NonSerialized] private Vector2 _centeringVelocity;
-    [NonSerialized] public int latestNeighborhoodCount = 0;
-    [NonSerialized] public List<Boid> latestNeighborhood;
-    [NonSerialized] private BoidController _parent;
-    [NonSerialized] public bool _isFocused = false;
-    [NonSerialized] private LineRenderer[] _lineRenderers;
+    // Basic Boid Physics Attributes
+    private Vector2 _position = Vector2.zero;
+    public Vector2 velocity;
 
+    // Wrapping related attributes
+    private bool _isWrappingX;
+    private bool _isWrappingY;
+    private Vector2 _centeringVelocity;
+
+    // Used for tracking Gizmo drawing
+    public int latestNeighborhoodCount = 0;
+    public List<Boid> latestNeighborhood;
+
+    // Parent Boid Controller
+    private BoidController _parent;
+
+    public bool isFocused; // Whether or not the current Boid is focused
+    private LineRenderer[] _lineRenderers; // Store LineRenderers used by Focused Boids
 
     private void Start() {
         _parent = transform.parent
             .GetComponent<BoidController>(); // Parent used to perform physics math without caching
-        _velocity = Util.GetRandomVelocity(Random.Range(_parent.minSpeed, _parent.maxSpeed)); // Acquire a Velocity Vector with a magnitude
+        velocity = Util.GetRandomVelocity(Random.Range(_parent.minSpeed,
+            _parent.maxSpeed)); // Acquire a Velocity Vector with a magnitude
         _position = transform.position; // Track 2D position separately
         transform.name = $"Boid {transform.GetSiblingIndex()}"; // Name the Game Object so Boids can be tracked somewhat
     }
 
     private void Update() {
         // Updates the rotation of the object based on the Velocity
-        transform.eulerAngles = new Vector3(0, 0, Mathf.Rad2Deg * -Mathf.Atan2(_velocity.x, _velocity.y));
+        transform.eulerAngles = new Vector3(0, 0, Mathf.Rad2Deg * -Mathf.Atan2(velocity.x, velocity.y));
 
         // Skip Flock Calculations if wrapping in progress
         if (_isWrappingX || _isWrappingY) {
@@ -44,7 +47,7 @@ public class Boid : MonoBehaviour {
             latestNeighborhoodCount = flock.Count;
 
             // Only update latest neighborhood when we need it for focused boid Gizmo draws
-            if (_isFocused)
+            if (isFocused)
                 latestNeighborhood = flock;
 
             // Calculate all offsets and multiple by magnitudes given
@@ -62,13 +65,13 @@ public class Boid : MonoBehaviour {
             }
 
             // Limit the Velocity Vector to a certain Magnitude
-            _velocity += acceleration * Time.deltaTime;
-            float speed = _velocity.magnitude;
-            Vector2 dir = _velocity / speed;
+            velocity += acceleration * Time.deltaTime;
+            float speed = velocity.magnitude;
+            Vector2 dir = velocity / speed;
             speed = Mathf.Clamp(speed, _parent.minSpeed, _parent.maxSpeed);
-            _velocity = dir * speed;
+            velocity = dir * speed;
 
-            _position += _velocity * Time.deltaTime;
+            _position += velocity * Time.deltaTime;
             transform.position = _position;
             // transform.forward = dir;
         }
@@ -83,7 +86,7 @@ public class Boid : MonoBehaviour {
     /// <param name="vector">Force Vector being applied by a rule</param>
     /// <returns>Vector2 force to be applied</returns>
     private Vector2 SteerTowards(Vector2 vector) {
-        Vector2 v = vector.normalized * _parent.maxSpeed - _velocity;
+        Vector2 v = vector.normalized * _parent.maxSpeed - velocity;
         return Vector2.ClampMagnitude(v, _parent.maxSteerForce);
     }
 
@@ -150,9 +153,9 @@ public class Boid : MonoBehaviour {
 
         Vector2 perceived = Vector2.zero;
         foreach (Boid boid in flock)
-            perceived += boid._velocity;
+            perceived += boid.velocity;
         perceived /= flock.Count;
-        return (perceived - _velocity) / 8.0f;
+        return (perceived - velocity) / 8.0f;
     }
 
     // Asks Boids to stay within the Boundaries set
@@ -189,15 +192,15 @@ public class Boid : MonoBehaviour {
 
             // FOV Check
             if (_parent.enableFovChecks) {
-                float angle1 = Util.Vector2ToAngle(_velocity); // Current Heading
-                float angle2 = Util.AngleBetween(transform.position, boid.transform.position);  // Angle between Boid and other Boid
+                float angle1 = Util.Vector2ToAngle(velocity); // Current Heading
+                float angle2 =
+                    Util.AngleBetween(transform.position, boid.transform.position); // Angle between Boid and other Boid
 
                 // Outside of FOV range, skip
                 if (Mathf.Abs(Mathf.DeltaAngle(angle1, angle2)) > _parent.boidFov / 2)
                     continue;
-                
             }
-            
+
             // Boid passed all checks, add to local Flock list
             flock.Add(boid);
         }
@@ -207,12 +210,12 @@ public class Boid : MonoBehaviour {
 
     // Sets up a Boid to be 'Focused', adds Circles around object and changes color
     public void EnableFocusing() {
-        if (_isFocused) {
+        if (isFocused) {
             Debug.LogWarning($"enableFocusing called on previously focused Boid ({transform.name})");
             return;
         }
 
-        _isFocused = true;
+        isFocused = true;
 
         // Create all LineRenderers
         _lineRenderers = new LineRenderer[3];
@@ -230,13 +233,13 @@ public class Boid : MonoBehaviour {
 
     // Disable focusing, removing LineRenderers and resetting color
     public void DisableFocusing() {
-        _isFocused = false;
+        isFocused = false;
 
         // Update Mesh Material Color
         var oldTriangle = transform.GetComponent<Triangle>();
         oldTriangle.meshRenderer.material.color = new Color32(49, 61, 178, 255);
-    
-        
+
+
         // Destroy Line Renderers (and child GameObjects)
         for (int i = 0; i < _lineRenderers.Length; i++) {
             _lineRenderers[i].positionCount = 0;
@@ -265,12 +268,12 @@ public class Boid : MonoBehaviour {
     /// <param name="redraw"><c>true</c> if draw operation should be treated as a re-draw</param>
     public void Draw(bool redraw) {
         // Clear positions when redrawing
-        if(redraw)
+        if (redraw)
             foreach (LineRenderer lineRenderer in _lineRenderers)
                 lineRenderer.positionCount = 0;
-        
+
         // Add a LineRenderer for Radius Drawing
-        if(_parent.enableFovChecks)
+        if (_parent.enableFovChecks)
             ShapeDraw.DrawArc(_lineRenderers[2], _parent.boidFov, _parent.boidGroupRange); // FOV Arc
         else
             ShapeDraw.DrawCircle(_lineRenderers[0], _parent.boidGroupRange); // Group Circle
