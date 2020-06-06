@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
-using Debug = System.Diagnostics.Debug;
 using Random = UnityEngine.Random;
 
 public class BoidController : MonoBehaviour {
@@ -106,15 +105,16 @@ public class BoidController : MonoBehaviour {
     /// <summary>
     /// Adds a number of boids.
     /// </summary>
-    /// <param name="n"></param>
-    public void AddBoids(int n) {
+    /// <param name="n">Number of Boids to add</param>
+    /// <param name="useNearby">Spawn Boids nearby each other</param>
+    public void AddBoids(int n, bool useNearby = false) {
         // Skip if negative or zero
         if (n <= 0)
             return;
         
         for (int i = 0; i < n; i++) {
             // Instantiate a Boid prefab within the boundaries randomly
-            Vector2 position = RandomPosition() * 0.90f;
+            Vector2 position = useNearby ? RandomNearbyPosition() : RandomPosition() * 0.90f;
             GameObject boid = Instantiate(boidObject, position, Quaternion.identity);
 
             // Set parent, add Boid component to Boids list
@@ -161,5 +161,29 @@ public class BoidController : MonoBehaviour {
         return new Vector2(
             Random.Range(-Boundary.size.x, Boundary.size.x) / 2,
             Random.Range(-Boundary.size.y, Boundary.size.y) / 2);
+    }
+
+    /// <summary>
+    /// Returns a random valid position near a Boid
+    /// </summary>
+    /// <returns>A Vector2 position within the set boundaries</returns>
+    private Vector2 RandomNearbyPosition(int maxRetries = 5) { 
+        for (int i = 0; i < maxRetries; i++) {
+            Vector2 possible = RandomBoid().GetNearby(boidSeparationRange);
+            if (Boundary.Contains(possible))
+                return possible;
+        }
+
+        // if MaxRetries exceeded, fall back to RandomPosition()
+        Debug.Log($"{maxRetries} retries failed, falling back to RandomPosition");
+        return RandomPosition();
+    }
+
+    /// <summary>
+    /// Returns a random Boid
+    /// </summary>
+    /// <returns></returns>
+    public Boid RandomBoid() {
+        return boids[Random.Range(0, boids.Count - 1)];
     }
 }

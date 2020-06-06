@@ -285,4 +285,14 @@ public class Boid : MonoBehaviour {
             _lineRenderers[2].transform.Rotate(0, 0, _parent.boidFov / 2f);
         }
     }
+
+    /// <summary>
+    /// Return a random position nearby a certain distance away
+    /// </summary>
+    /// <param name="distance">Vector2 position</param>
+    /// <returns></returns>
+    public Vector2 GetNearby(float distance) {
+        return _position + Util.RotateBy(new Vector2(distance, distance),
+            Random.Range(0f, 360f));
+    }
 }

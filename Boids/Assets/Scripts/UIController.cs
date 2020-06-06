@@ -235,8 +235,8 @@ public class UIController : MonoBehaviour {
                 GameObject adjPanelGo;
                 LeanTween
                     .move((adjPanelGo = adjPanel.gameObject),
-                        adjPanelGo.transform.position + _adjustmentsDiff * (away ? 1 : -1), 1.15f)
-                    .setDelay(away ? 0f : 0.15f)
+                        adjPanelGo.transform.position + _adjustmentsDiff * (away ? 1 : -1), away ? 0.9f : 1.15f)
+                    .setDelay(away ? 0f : 0.05f)
                     .setEase(LeanTweenType.easeInOutCubic)
                     .setOnComplete(StartTween());
                 break;

@@ -14,7 +14,7 @@ public class BoidControllerEditor : UnityEditor.Editor {
         if (EditorGUI.EndChangeCheck() && Application.isPlaying) {
             int diff = controller.boidCount - controller.boids.Count;
             if (diff > 1)
-                controller.AddBoids(diff);
+                controller.AddBoids(diff, controller.boids.Count > 15);
             else if (diff < 0)
                 controller.RemoveBoids(Mathf.Abs(diff));
         }
