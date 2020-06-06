@@ -15,6 +15,8 @@ public class Boid : MonoBehaviour {
     [NonSerialized] public List<Boid> latestNeighborhood;
     [NonSerialized] private BoidController _parent;
     [NonSerialized] public bool _isFocused = false;
+    [NonSerialized] private LineRenderer[] _lineRenderers;
+
 
     private void Start() {
         _parent = transform.parent
@@ -187,7 +189,8 @@ public class Boid : MonoBehaviour {
                     continue;
                 
             }
-
+            
+            // Boid passed all checks, add to local Flock list
             flock.Add(boid);
         }
 
@@ -202,6 +205,12 @@ public class Boid : MonoBehaviour {
         }
 
         _isFocused = true;
+
+        // Create all LineRenderers
+        _lineRenderers = new LineRenderer[3];
+        _lineRenderers[0] = GetLineRenderer("Group Range");
+        _lineRenderers[1] = GetLineRenderer("Separation Range");
+        _lineRenderers[2] = GetLineRenderer("FOV Arc");
 
         // Update Mesh Material Color
         var triangle = transform.GetComponent<Triangle>();
@@ -218,10 +227,12 @@ public class Boid : MonoBehaviour {
         // Update Mesh Material Color
         var oldTriangle = transform.GetComponent<Triangle>();
         oldTriangle.meshRenderer.material.color = new Color32(49, 61, 178, 255);
-
+    
+        
         // Destroy Line Renderers (and child GameObjects)
         foreach (Transform child in transform)
             Destroy(child.gameObject);
+        Array.Clear(_lineRenderers, 0, _lineRenderers.Length);
     }
 
     /// <summary>
@@ -231,22 +242,30 @@ public class Boid : MonoBehaviour {
     /// <returns>A LineRenderer</returns>
     public LineRenderer GetLineRenderer(string childName) {
         var child = new GameObject(childName);
+        // Make object a child of Boid, set position as such
         child.transform.SetParent(transform);
         child.transform.position = transform.position;
+        // add and return LineRenderer component
         return child.AddComponent<LineRenderer>();
     }
 
     public void Draw(bool redraw) {
-        if (redraw)
-            foreach (Transform child in transform)
-                Destroy(child.gameObject);
-
+        // Clear positions when redrawing
+        if(redraw)
+            foreach (LineRenderer lineRenderer in _lineRenderers)
+                lineRenderer.positionCount = 0;
+        
         // Add a LineRenderer for Radius Drawing
-        DrawCircle(_parent.boidSeparationRange, "Separation Range Circle");
-        DrawCircle(_parent.boidGroupRange, "Group Range Circle");
+        if(_parent.enableFOVChecks)
+            ShapeDraw.DrawArc(_lineRenderers[2], _parent.boidFOV, _parent.boidGroupRange); // FOV Arc
+        else
+            ShapeDraw.DrawCircle(_lineRenderers[0], _parent.boidGroupRange); // Group Circle
+        ShapeDraw.DrawCircle(_lineRenderers[1], _parent.boidSeparationRange); // Separation Circle
 
-        // Draw FOV Line
-        DrawArcCentered(_parent.boidGroupRange, Util.Vector2ToAngle(_velocity),
-            _parent.boidFOV, "FOV Arc");
+        if (_parent.enableFOVChecks) {
+            // Set FOV Arc rotation to mimic Boid transform rotation
+            _lineRenderers[2].transform.rotation = transform.rotation;
+            _lineRenderers[2].transform.Rotate(0, 0, _parent.boidFOV / 2f + 180);
+        }
     }
 }

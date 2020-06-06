@@ -97,6 +97,13 @@ public class BoidController : MonoBehaviour {
         Boundary = new Rect(Vector2.zero, Space.size * 0.95f);
         Boundary.center = Space.center;
 
+        ShapeDraw.CircleWidth = circleWidth;
+        ShapeDraw.ArcWidth = circleWidth;
+        ShapeDraw.CircleVertexCount = circleVertexCount;
+        // ShapeDraw.ArcVertexCount = arcVertexCount;
+
+        Time.timeScale = 0.3f;
+
         AddBoids(boidCount);
     }
 
