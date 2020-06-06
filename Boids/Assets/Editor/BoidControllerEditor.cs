@@ -20,8 +20,6 @@ public class BoidControllerEditor : UnityEditor.Editor {
         }
 
         // Basic Boid Controller Attributes
-        controller.boidStartVelocity =
-            EditorGUILayout.Slider("Start Velocity", controller.boidStartVelocity, 0.01f, 25.0f);
         EditorGUILayout.MinMaxSlider("Speed Limit", ref controller.minSpeed, ref controller.maxSpeed, 0.01f, 25f);
         // controller.minSpeed = EditorGUILayout.Slider("Minimum Speed", controller.minSpeed, 0.01f, 25.0f);
         // controller.maxSpeed = EditorGUILayout.Slider("Maximum Speed", controller.maxSpeed, 0.01f, 25.0f);

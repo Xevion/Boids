@@ -2,6 +2,7 @@
 using System.Collections.Generic;
     using UnityEditor;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 // Boids are represented by a moving, rotating triangle.
 // Boids should communicate with sibling Boids via the parental BoidController object
@@ -14,14 +15,14 @@ public class Boid : MonoBehaviour {
     [NonSerialized] public int latestNeighborhoodCount = 0;
     [NonSerialized] public List<Boid> latestNeighborhood;
     [NonSerialized] private BoidController _parent;
-    [NonSerialized] public bool _isFocused = false;
+    [NonSerialized] public bool _isFocused;
     [NonSerialized] private LineRenderer[] _lineRenderers;
 
 
     private void Start() {
         _parent = transform.parent
             .GetComponent<BoidController>(); // Parent used to perform physics math without caching
-        _velocity = Util.GetRandomVelocity(_parent.boidStartVelocity); // Acquire a Velocity Vector with a magnitude
+        _velocity = Util.GetRandomVelocity(Random.Range(_parent.minSpeed, _parent.maxSpeed)); // Acquire a Velocity Vector with a magnitude
         _position = transform.position; // Track 2D position separately
         transform.name = $"Boid {transform.GetSiblingIndex()}"; // Name the Game Object so Boids can be tracked somewhat
     }

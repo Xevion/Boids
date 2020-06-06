@@ -11,18 +11,17 @@ public class BoidController : MonoBehaviour {
     [NonSerialized] public Rect Boundary;
 
     // Swarm Attributes
-    [SerializeField] public int boidCount = 50;
-    [SerializeField] public float boidGroupRange = 1.0f;
-    [SerializeField] public float boidStartVelocity = 0.005f;
+    [SerializeField] public int boidCount = 250;
+    [SerializeField] public float boidGroupRange = 3.3f;
     [SerializeField] public float minSpeed;
     [SerializeField] public float maxSpeed;
 
     // Boid Rules are multiplied by this to allow rule 'tweaking'
     [SerializeField] public float globalBias = 1.0f;
-    [SerializeField] public float separationBias = 0.05f;
-    [SerializeField] public float alignmentBias = 0.05f;
-    [SerializeField] public float cohesionBias = 0.05f;
-    [SerializeField] public float boundaryBias = 1f;
+    [SerializeField] public float separationBias = 2f;
+    [SerializeField] public float alignmentBias = 0.288f;
+    [SerializeField] public float cohesionBias = 0.3f;
+    [SerializeField] public float boundaryBias = 1.5f;
 
     // Enable/Disable Boid Rules Altogether
     [SerializeField] public bool enableSeparation = true;
@@ -31,12 +30,12 @@ public class BoidController : MonoBehaviour {
     [SerializeField] public bool enableBoundary = true;
     [SerializeField] public bool enableFovChecks = true;
 
-    [SerializeField] public float boidSeparationRange = 2.3f; // Boid Separation rule's activation distance
-    [SerializeField] public float boundaryForce = 10f; // The force applied when a Boid hits the boundary
+    [SerializeField] public float boidSeparationRange = 1.4f; // Boid Separation rule's activation distance
+    [SerializeField] public float boundaryForce = 50f; // The force applied when a Boid hits the boundary
     [SerializeField] public bool localFlocks = true; // Calculate Local 'Neighborhood' for flocks?
     [SerializeField] public bool edgeWrapping = true; // Enforce Edge Wrapping
-    [SerializeField] public float maxSteerForce = 10f;
-    [SerializeField] public float boidFov = 220;
+    [SerializeField] public float maxSteerForce = 400f;
+    [SerializeField] public float boidFov = 240;
 
 
     public Boid focusedBoid; // A focused Boid has special rendering
