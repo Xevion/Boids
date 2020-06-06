@@ -231,7 +231,7 @@ public class Boid : MonoBehaviour {
         
         // Destroy Line Renderers (and child GameObjects)
         foreach (Transform child in transform)
-            Destroy(child.gameObject);
+            DestroyImmediate(child.gameObject);
         Array.Clear(_lineRenderers, 0, _lineRenderers.Length);
     }
 
@@ -265,7 +265,7 @@ public class Boid : MonoBehaviour {
         if (_parent.enableFOVChecks) {
             // Set FOV Arc rotation to mimic Boid transform rotation
             _lineRenderers[2].transform.rotation = transform.rotation;
-            _lineRenderers[2].transform.Rotate(0, 0, _parent.boidFOV / 2f + 180);
+            _lineRenderers[2].transform.Rotate(0, 0, _parent.boidFOV / 2f);
         }
     }
 }
