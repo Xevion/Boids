@@ -35,9 +35,6 @@ public class BoidController : MonoBehaviour {
     [SerializeField] public float boundaryForce = 10f; // The force applied when a Boid hits the boundary
     [SerializeField] public bool localFlocks = true; // Calculate Local 'Neighborhood' for flocks?
     [SerializeField] public bool edgeWrapping = true; // Enforce Edge Wrapping
-    [SerializeField] public int circleVertexCount = 360; // The number of vertices for circles displayed
-    [SerializeField] public int arcVertexCount = 180; // The number of vertices for arcs displayed, -1 for auto
-    [SerializeField] public float circleWidth = 0.1f; // Width of circle
     [SerializeField] public float maxSteerForce = 10f;
     [SerializeField] public float boidFov = 220;
 
