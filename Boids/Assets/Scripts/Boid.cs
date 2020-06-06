@@ -230,9 +230,11 @@ public class Boid : MonoBehaviour {
     
         
         // Destroy Line Renderers (and child GameObjects)
-        foreach (Transform child in transform)
-            DestroyImmediate(child.gameObject);
-        Array.Clear(_lineRenderers, 0, _lineRenderers.Length);
+        for (int i = 0; i < _lineRenderers.Length; i++) {
+            _lineRenderers[i].positionCount = 0;
+            DestroyImmediate(_lineRenderers[i].gameObject);
+            _lineRenderers[i] = null;
+        }
     }
 
     /// <summary>

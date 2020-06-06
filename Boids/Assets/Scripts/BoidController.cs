@@ -102,8 +102,6 @@ public class BoidController : MonoBehaviour {
         ShapeDraw.CircleVertexCount = circleVertexCount;
         // ShapeDraw.ArcVertexCount = arcVertexCount;
 
-        Time.timeScale = 0.3f;
-
         AddBoids(boidCount);
     }
 
