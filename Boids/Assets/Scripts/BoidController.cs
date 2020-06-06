@@ -98,7 +98,7 @@ public class BoidController : MonoBehaviour {
         float height = 2f * Cam.orthographicSize;
         var size = new Vector2(height * Cam.aspect, height);
         Space = new Rect((Vector2) transform.position - size / 2, size);
-        Boundary = new Rect(Vector2.zero, Space.size * 0.95f);
+        Boundary = new Rect(Vector2.zero, Space.size * 0.90f);
         Boundary.center = Space.center;
     }
 
@@ -113,7 +113,7 @@ public class BoidController : MonoBehaviour {
         
         for (int i = 0; i < n; i++) {
             // Instantiate a Boid prefab within the boundaries randomly
-            Vector2 position = RandomPosition() * 0.95f;
+            Vector2 position = RandomPosition() * 0.90f;
             GameObject boid = Instantiate(boidObject, position, Quaternion.identity);
 
             // Set parent, add Boid component to Boids list

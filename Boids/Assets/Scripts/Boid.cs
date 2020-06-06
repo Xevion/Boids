@@ -15,7 +15,7 @@ public class Boid : MonoBehaviour {
     [NonSerialized] public int latestNeighborhoodCount = 0;
     [NonSerialized] public List<Boid> latestNeighborhood;
     [NonSerialized] private BoidController _parent;
-    [NonSerialized] public bool _isFocused;
+    [NonSerialized] public bool _isFocused = false;
     [NonSerialized] private LineRenderer[] _lineRenderers;
 
 
@@ -38,11 +38,12 @@ public class Boid : MonoBehaviour {
             transform.position = _position;
         }
         else {
+            // Find local neighborhood flock
             Vector2 acceleration = Vector2.zero;
             List<Boid> flock = _parent.localFlocks ? GetFlock(_parent.boids, _parent.boidGroupRange) : _parent.boids;
             latestNeighborhoodCount = flock.Count;
 
-            // Only update latest neighborhood when we need it for focused boid gizmo draws
+            // Only update latest neighborhood when we need it for focused boid Gizmo draws
             if (_isFocused)
                 latestNeighborhood = flock;
 
@@ -56,8 +57,9 @@ public class Boid : MonoBehaviour {
                     acceleration += SteerTowards(Rule3(flock)) * _parent.alignmentBias;
             }
 
-            if (_parent.enableBoundary && _parent.Boundary.Contains(_position))
+            if (_parent.enableBoundary && !_parent.Boundary.Contains(_position)) {
                 acceleration += SteerTowards(RuleBound()) * _parent.boundaryBias;
+            }
 
             // Limit the Velocity Vector to a certain Magnitude
             _velocity += acceleration * Time.deltaTime;
@@ -75,6 +77,11 @@ public class Boid : MonoBehaviour {
             Wrapping();
     }
 
+    /// <summary>
+    /// Assists with clamping and normalizing a Vector2 force
+    /// </summary>
+    /// <param name="vector">Force Vector being applied by a rule</param>
+    /// <returns>Vector2 force to be applied</returns>
     private Vector2 SteerTowards(Vector2 vector) {
         Vector2 v = vector.normalized * _parent.maxSpeed - _velocity;
         return Vector2.ClampMagnitude(v, _parent.maxSteerForce);
@@ -252,6 +259,10 @@ public class Boid : MonoBehaviour {
         return child.AddComponent<LineRenderer>();
     }
 
+    /// <summary>
+    /// Draw (or re-draw) all lines corresponding to separation and group circles and FOV Arc
+    /// </summary>
+    /// <param name="redraw"><c>true</c> if draw operation should be treated as a re-draw</param>
     public void Draw(bool redraw) {
         // Clear positions when redrawing
         if(redraw)

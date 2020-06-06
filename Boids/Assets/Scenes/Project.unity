@@ -1254,7 +1254,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   boidCount: 244
   boidGroupRange: 3.29
-  boidStartVelocity: 14.8
   minSpeed: 9.225757
   maxSpeed: 9.225757
   globalBias: 1
@@ -1266,15 +1265,13 @@ MonoBehaviour:
   enableAlignment: 1
   enableCohesion: 1
   enableBoundary: 1
-  enableFOVChecks: 1
+  enableFovChecks: 1
   boidSeparationRange: 1.4
   boundaryForce: 50
   localFlocks: 1
   edgeWrapping: 1
-  circleVertexCount: 360
-  circleWidth: 0.1
   maxSteerForce: 383
-  boidFOV: 297
+  boidFov: 239
   focusedBoid: {fileID: 0}
   boidObject: {fileID: 1737515784064720040, guid: 23e1eaaf69d4ef342ac3ef9590f6c642,
     type: 3}

@@ -9,7 +9,7 @@ public class BoidControllerEditor : UnityEditor.Editor {
 
         // Boid Count update
         EditorGUI.BeginChangeCheck();
-        controller.boidCount = EditorGUILayout.IntSlider("Boid Count", controller.boidCount, -1, 500);
+        controller.boidCount = EditorGUILayout.IntSlider("Boid Count", controller.boidCount, 0, 500);
         // Check must be performed or Boids will be added outside of gameplay
         if (EditorGUI.EndChangeCheck() && Application.isPlaying) {
             int diff = controller.boidCount - controller.boids.Count;
@@ -23,7 +23,7 @@ public class BoidControllerEditor : UnityEditor.Editor {
         EditorGUILayout.MinMaxSlider("Speed Limit", ref controller.minSpeed, ref controller.maxSpeed, 0.01f, 25f);
         // controller.minSpeed = EditorGUILayout.Slider("Minimum Speed", controller.minSpeed, 0.01f, 25.0f);
         // controller.maxSpeed = EditorGUILayout.Slider("Maximum Speed", controller.maxSpeed, 0.01f, 25.0f);
-        controller.boundaryForce = EditorGUILayout.Slider("Boundary Force", controller.boundaryForce, 0.25f, 50f);
+        controller.boundaryForce = EditorGUILayout.Slider("Boundary Force", controller.boundaryForce, 0.25f, 500f);
         controller.maxSteerForce = EditorGUILayout.Slider("Max Steer Force", controller.maxSteerForce, 1f, 500f);
 
         EditorGUI.BeginChangeCheck();
