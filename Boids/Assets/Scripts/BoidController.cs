@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
-using Debug = System.Diagnostics.Debug;
 using Random = UnityEngine.Random;
 
 public class BoidController : MonoBehaviour {
@@ -29,14 +28,17 @@ public class BoidController : MonoBehaviour {
     [SerializeField] public bool enableAlignment = true;
     [SerializeField] public bool enableCohesion = true;
     [SerializeField] public bool enableBoundary = true;
+    [SerializeField] public bool enableFOVChecks = true;
 
     [SerializeField] public float boidSeparationRange = 2.3f; // Boid Separation rule's activation distance
     [SerializeField] public float boundaryForce = 10f; // The force applied when a Boid hits the boundary
     [SerializeField] public bool localFlocks = true; // Calculate Local 'Neighborhood' for flocks?
     [SerializeField] public bool edgeWrapping = true; // Enforce Edge Wrapping
-    [SerializeField] public int circleVertexCount = 40; // The number of vertices for circles displayed
+    [SerializeField] public int circleVertexCount = 360; // The number of vertices for circles displayed
+    [SerializeField] public int arcVertexCount = -1; // The number of vertices for arcs displayed, -1 for auto
     [SerializeField] public float circleWidth = 0.1f; // Width of circle
     [SerializeField] public float maxSteerForce = 10f;
+    [SerializeField] public float boidFOV = 160;
 
 
     public Boid focusedBoid; // A focused Boid has special rendering
@@ -76,6 +78,12 @@ public class BoidController : MonoBehaviour {
             focusedBoid = boids[Random.Range(0, boids.Count)];
             focusedBoid.EnableFocusing();
         }
+        
+        // Focus on the boid in scene view when one is focused
+        #if UNITY_EDITOR
+        if(focusedBoid != null)
+            SceneView.lastActiveSceneView.LookAtDirect(focusedBoid.transform.position, Quaternion.identity);
+        #endif
     }
 
     private void Start() {
@@ -88,6 +96,11 @@ public class BoidController : MonoBehaviour {
         Space = new Rect((Vector2) transform.position - size / 2, size);
         Boundary = new Rect(Vector2.zero, Space.size * 0.95f);
         Boundary.center = Space.center;
+
+        ShapeDraw.CircleWidth = circleWidth;
+        ShapeDraw.ArcWidth = circleWidth;
+        ShapeDraw.CircleVertexCount = circleVertexCount;
+        // ShapeDraw.ArcVertexCount = arcVertexCount;
 
         AddBoids(boidCount);
     }

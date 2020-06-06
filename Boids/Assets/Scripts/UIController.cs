@@ -76,7 +76,7 @@ public class UIController : MonoBehaviour {
 
     private void Start() {
         // Set Target Application Framerate
-        Application.targetFrameRate = 90;
+        // Application.targetFrameRate = 90;
 
         // Basic variable setup
         _currentUI = UIStance.Title;

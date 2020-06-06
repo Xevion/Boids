@@ -1252,27 +1252,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7d72224fef7a4fb4a998b0980fe0eb77, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  boidCount: 372
-  boidGroupRange: 3.03
+  boidCount: 244
+  boidGroupRange: 3.29
   boidStartVelocity: 14.8
-  minSpeed: 12
-  maxSpeed: 12
+  minSpeed: 9.225757
+  maxSpeed: 9.225757
   globalBias: 1
-  separationBias: 1.5
-  alignmentBias: 0.517
-  cohesionBias: 0.451
-  boundaryBias: 1.492
+  separationBias: 1.95
+  alignmentBias: 0.288
+  cohesionBias: 0.296
+  boundaryBias: 1.5
   enableSeparation: 1
   enableAlignment: 1
   enableCohesion: 1
   enableBoundary: 1
-  boidSeparationRange: 2.3
-  boundaryForce: 7.6
+  enableFOVChecks: 1
+  boidSeparationRange: 1.4
+  boundaryForce: 50
   localFlocks: 1
   edgeWrapping: 1
   circleVertexCount: 360
   circleWidth: 0.1
-  maxSteerForce: 138
+  maxSteerForce: 383
+  boidFOV: 297
   focusedBoid: {fileID: 0}
   boidObject: {fileID: 1737515784064720040, guid: 23e1eaaf69d4ef342ac3ef9590f6c642,
     type: 3}

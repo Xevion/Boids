@@ -1,27 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
+    using UnityEditor;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 // Boids are represented by a moving, rotating triangle.
-// Boids should communicate with sibling Boids
+// Boids should communicate with sibling Boids via the parental BoidController object
 public class Boid : MonoBehaviour {
     [NonSerialized] private Vector2 _position = Vector2.zero;
-    [NonSerialized] private Vector2 _velocity;
+    [NonSerialized] public Vector2 _velocity;
     [NonSerialized] private bool _isWrappingX = false;
     [NonSerialized] private bool _isWrappingY = false;
-    [NonSerialized] private Renderer[] _renderers;
     [NonSerialized] private Vector2 _centeringVelocity;
-    [NonSerialized] private int _latestNeighborhoodCount = 0;
+    [NonSerialized] public int latestNeighborhoodCount = 0;
+    [NonSerialized] public List<Boid> latestNeighborhood;
     [NonSerialized] private BoidController _parent;
-    [NonSerialized] public bool isFocused = false;
+    [NonSerialized] public bool _isFocused = false;
+    [NonSerialized] private LineRenderer[] _lineRenderers;
+
 
     private void Start() {
         _parent = transform.parent
             .GetComponent<BoidController>(); // Parent used to perform physics math without caching
-        _renderers = transform.GetComponents<Renderer>(); // Acquire Renderer(s) to check for Boid visibility
         _velocity = Util.GetRandomVelocity(_parent.boidStartVelocity); // Acquire a Velocity Vector with a magnitude
         _position = transform.position; // Track 2D position separately
         transform.name = $"Boid {transform.GetSiblingIndex()}"; // Name the Game Object so Boids can be tracked somewhat
@@ -29,7 +28,7 @@ public class Boid : MonoBehaviour {
 
     private void Update() {
         // Updates the rotation of the object based on the Velocity
-        transform.rotation = Quaternion.Euler(0, 0, Mathf.Rad2Deg * -Mathf.Atan2(_velocity.x, _velocity.y));
+        transform.eulerAngles = new Vector3(0, 0, Mathf.Rad2Deg * -Mathf.Atan2(_velocity.x, _velocity.y));
 
         // Skip Flock Calculations if wrapping in progress
         if (_isWrappingX || _isWrappingY) {
@@ -40,7 +39,11 @@ public class Boid : MonoBehaviour {
         else {
             Vector2 acceleration = Vector2.zero;
             List<Boid> flock = _parent.localFlocks ? GetFlock(_parent.boids, _parent.boidGroupRange) : _parent.boids;
-            _latestNeighborhoodCount = flock.Count;
+            latestNeighborhoodCount = flock.Count;
+
+            // Only update latest neighborhood when we need it for focused boid gizmo draws
+            if (_isFocused)
+                latestNeighborhood = flock;
 
             // Calculate all offsets and multiple by magnitudes given
             if (flock.Count > 0) {
@@ -169,64 +172,102 @@ public class Boid : MonoBehaviour {
 
     // Returns a list of boids within a certain radius of the Boid, representing it's local 'flock'
     private List<Boid> GetFlock(List<Boid> boids, float radius) {
-        return boids.Where(boid => boid != this && Vector2.Distance(this._position, boid._position) <= radius).ToList();
+        List<Boid> flock = new List<Boid>();
+
+        foreach (Boid boid in boids) {
+            // Distance Check
+            if (boid == this || Vector2.Distance(this._position, boid._position) > radius)
+                continue;
+
+            // FOV Check
+            if (_parent.enableFOVChecks) {
+                float angle1 = Util.Vector2ToAngle(_velocity); // Current Heading
+                float angle2 = Util.AngleBetween(transform.position, boid.transform.position);  // Angle between Boid and other Boid
+
+                // Outside of FOV range, skip
+                if (Mathf.Abs(Mathf.DeltaAngle(angle1, angle2)) > _parent.boidFOV / 2)
+                    continue;
+                
+            }
+            
+            // Boid passed all checks, add to local Flock list
+            flock.Add(boid);
+        }
+
+        return flock;
     }
 
     // Sets up a Boid to be 'Focused', adds Circles around object and changes color
     public void EnableFocusing() {
-        if (isFocused) {
-            Debug.LogWarning("enableFocusing called on previously focused Boid");
+        if (_isFocused) {
+            Debug.LogWarning($"enableFocusing called on previously focused Boid ({transform.name})");
             return;
         }
 
-        isFocused = true;
+        _isFocused = true;
+
+        // Create all LineRenderers
+        _lineRenderers = new LineRenderer[3];
+        _lineRenderers[0] = GetLineRenderer("Group Range");
+        _lineRenderers[1] = GetLineRenderer("Separation Range");
+        _lineRenderers[2] = GetLineRenderer("FOV Arc");
 
         // Update Mesh Material Color
         var triangle = transform.GetComponent<Triangle>();
         triangle.meshRenderer.material.color = Color.red;
 
-        // Add a LineRenderer for Radius Drawing
-        DrawCircle(_parent.boidSeparationRange, "Separation Range Circle");
-        DrawCircle(_parent.boidGroupRange, "Group Range Circle");
+        // Draw all focus related elements
+        Draw(false);
     }
 
     // Disable focusing, removing LineRenderers and resetting color
     public void DisableFocusing() {
-        isFocused = false;
+        _isFocused = false;
 
         // Update Mesh Material Color
         var oldTriangle = transform.GetComponent<Triangle>();
         oldTriangle.meshRenderer.material.color = new Color32(49, 61, 178, 255);
-
+    
+        
         // Destroy Line Renderers (and child GameObjects)
-        foreach (Transform child in transform)
-            Destroy(child.gameObject);
+        for (int i = 0; i < _lineRenderers.Length; i++) {
+            _lineRenderers[i].positionCount = 0;
+            DestroyImmediate(_lineRenderers[i].gameObject);
+            _lineRenderers[i] = null;
+        }
     }
 
-    private void DrawCircle(float radius, string childName) {
-        // Create a new child GameObject to hold the LineRenderer Component
+    /// <summary>
+    /// returns a new LineRenderer component stored on a child GameObject.
+    /// </summary>
+    /// <param name="childName">The name of the associated child GameObject</param>
+    /// <returns>A LineRenderer</returns>
+    public LineRenderer GetLineRenderer(string childName) {
         var child = new GameObject(childName);
+        // Make object a child of Boid, set position as such
         child.transform.SetParent(transform);
         child.transform.position = transform.position;
-        var line = child.AddComponent<LineRenderer>();
+        // add and return LineRenderer component
+        return child.AddComponent<LineRenderer>();
+    }
 
-        _parent.circleVertexCount = 360;
+    public void Draw(bool redraw) {
+        // Clear positions when redrawing
+        if(redraw)
+            foreach (LineRenderer lineRenderer in _lineRenderers)
+                lineRenderer.positionCount = 0;
+        
+        // Add a LineRenderer for Radius Drawing
+        if(_parent.enableFOVChecks)
+            ShapeDraw.DrawArc(_lineRenderers[2], _parent.boidFOV, _parent.boidGroupRange); // FOV Arc
+        else
+            ShapeDraw.DrawCircle(_lineRenderers[0], _parent.boidGroupRange); // Group Circle
+        ShapeDraw.DrawCircle(_lineRenderers[1], _parent.boidSeparationRange); // Separation Circle
 
-        // Setup LineRenderer properties
-        line.useWorldSpace = false;
-        line.startWidth = _parent.circleWidth;
-        line.endWidth = _parent.circleWidth;
-        line.positionCount = _parent.circleVertexCount + 1;
-
-        // Calculate points for circle
-        var pointCount = _parent.circleVertexCount + 1;
-        var points = new Vector3[pointCount];
-        for (int i = 0; i < pointCount; i++) {
-            var rad = Mathf.Deg2Rad * (i * 360f / _parent.circleVertexCount);
-            points[i] = new Vector3(Mathf.Sin(rad) * radius, Mathf.Cos(rad) * radius, 0);
+        if (_parent.enableFOVChecks) {
+            // Set FOV Arc rotation to mimic Boid transform rotation
+            _lineRenderers[2].transform.rotation = transform.rotation;
+            _lineRenderers[2].transform.Rotate(0, 0, _parent.boidFOV / 2f);
         }
-
-        // Add points to LineRenderer
-        line.SetPositions(points);
     }
 }
