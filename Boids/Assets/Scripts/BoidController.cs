@@ -75,7 +75,7 @@ public class BoidController : MonoBehaviour {
         
         // Focus on the boid in scene view when one is focused
         #if UNITY_EDITOR
-        if(focusedBoid != null)
+        if(focusedBoid != null && SceneView.lastActiveSceneView != null)
             SceneView.lastActiveSceneView.LookAtDirect(focusedBoid.transform.position, Quaternion.identity);
         #endif
     }
