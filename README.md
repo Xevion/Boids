@@ -19,6 +19,16 @@
 - Boid tracking with field of view visuals (Space)
 - Performance statistics (CTRL+H, CTRL+G)
 
+<div align="center">
+    <a href="#">
+        <img src="./example.gif">
+    </a>
+    <br>
+    <sub>
+        Boids attempt to cohesively move together by each individually moving doing the same thing: move towards the center of the flock, align to the average heading of the flock, and keep a certain distance from eachother.
+    </sub>
+</div>
+
 ## Installation
 
 To download a release, check the [Releases](https://github.com/Xevion/Boids/releases) section and download the appropriate build. **Boids** is built on the Unity Engine, and thus should be fully compatible across Windows, Mac & Linux without trouble.
