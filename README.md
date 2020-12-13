@@ -1,5 +1,5 @@
 ﻿<div align="center">
-    <a href=""><img src="/banner.jpeg" alt="Boids" width="600"></a>
+    <a href=""><img src="/banner.jpeg" alt="Boids"></a>
     <br>
     <sub>
         Built with ❤︎ by <a href="https://github.com/Xevion/">Xevion</a>
