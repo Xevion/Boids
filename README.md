@@ -1,5 +1,5 @@
 ﻿<div align="center">
-    <a href=""><img src="/banner.svg" alt="Boids"></a>
+    <a href=""><img src="./.media/banner.svg" alt="Boids"></a>
     <br>
     <sub>
         Built with ❤︎ by <a href="https://github.com/Xevion/">Xevion</a>
@@ -21,7 +21,7 @@
 
 <div align="center">
     <a href="#">
-        <img src="./example.gif">
+        <img src="./.media/example.gif">
     </a>
     <br>
     <sub>
