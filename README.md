@@ -25,7 +25,7 @@
     </a>
     <br>
     <sub>
-        Boids attempt to cohesively move together by each individually moving doing the same thing: move towards the center of the flock, align to the average heading of the flock, and keep a certain distance from eachother.
+        Boids attempt to cohesively move together by each individually doing the same thing: move towards the center of the flock, align to the average heading of the flock, and keep a certain distance from eachother.
     </sub>
 </div>
 
